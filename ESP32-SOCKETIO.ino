@@ -13,12 +13,17 @@
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 
+//socketIO
 #include <SocketIoClient.h>
+SocketIoClient webSocket;
+
+#include <WebSocketsClient.h>
+
+
 #include <Preferences.h>
 #include <WiFi.h>
 #include <WiFiMulti.h>
 #include <WiFiAP.h>
-#include <WiFiClient.h>
 #include <DNSServer.h>
 #include <ArduinoJson.h>
 #include <HTTPClient.h>
@@ -31,17 +36,22 @@ String SCAD_SSID = "";
 String SCAD_PASS = "Password";
 
 const byte DNS_PORT = 53;
-//DNSServer dnsServer;
-IPAddress apIP(192, 168, 1, 1);
+DNSServer dnsServer;
+IPAddress apIP(192, 168, 4, 1);
 Preferences preferences;
+
+//local server
 AsyncWebServer server(80);
-SocketIoClient webSocket;
+AsyncWebSocket ws("/ws");
+
+//local client
+WebSocketsClient localSocket;
+
+
 WiFiMulti wifiMulti;
 
 bool isClient = false;
 String mac_address = "";
-
-int led = 2;
 bool setupFinished = false;
 unsigned long prevMillis;
 
@@ -85,9 +95,13 @@ void setup() {
     if (isClient == false) {
       Serial.println("No available SCAD Network, creating AP and server");
       createSCADAP();
+      setupCaptivePortal();
+      setupLocalServer();
     } else {
       //become client
-      postDataToServer();
+      localSocket.begin("192.168.4.1", 80, "/ws");
+      localSocket.onEvent(webSocketEvent);
+      localSocket.setReconnectInterval(5000);
     }
   } else {
     Serial.print("connected to:");
@@ -104,7 +118,7 @@ void setup() {
     Serial.println("IP address: ");
     Serial.println(WiFi.localIP());
 
-    checkForUpdate();
+    //checkForUpdate();
 
     // Setup 'on' listen events
     webSocket.on("connect", socket_Connected);
@@ -121,7 +135,10 @@ void setup() {
 void loop() {
 
   if (isClient == false) {
-    // dnsServer.processNextRequest();
+    ws.cleanupClients();
+    dnsServer.processNextRequest();
+  } else if (isClient == true && setupFinished == false) {
+    localSocket.loop();
   }
   if (setupFinished == true) {
     webSocket.loop();
@@ -175,24 +192,7 @@ void createSCADAP() {
   WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
   WiFi.softAP(SCAD_SSID.c_str(), SCAD_PASS.c_str());
   IPAddress myIP = WiFi.softAPIP();
-  // dnsServer.start(DNS_PORT, "*", apIP);
-
-  //captiveRoutes();
-
-  server.onRequestBody([](AsyncWebServerRequest * request, uint8_t *data, size_t len, size_t index, size_t total) {
-    if (request->url() == "/MAC/") {
-      if(exchangeMac(request,data)){
-      request->send(200, "application/json", requestBody);
-      } else {
-      request->send(404,"text/plain","No MAC");
-      }
-      blinkForever();
-    }
-  });
-
-  server.onNotFound(notFound);
-  server.begin();
-  Serial.println("HTTP server started");
+  Serial.println(myIP);
 }
 
 void saveMac(String mac) {
@@ -215,6 +215,7 @@ void checkLEDState() {
   digitalWrite(LEDPin, LEDState);
   const bool newState = digitalRead(buttonPin); // See if button is physically pushed
   if (!newState) {
+    Serial.println("button send");
     const size_t capacity = JSON_OBJECT_SIZE(2) + 50;
     DynamicJsonDocument doc(capacity);
     doc["macAddress"] = mac_address;

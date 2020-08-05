@@ -1,34 +1,3 @@
-void postDataToServer() {
-  //Sends Server device MAC address and receives Server device MAC address in return, then saves to preferences.
-  HTTPClient http;
-  if (wifiMulti.run() == WL_CONNECTED) {
-    http.begin("http://192.168.4.1/MAC/");
-    http.addHeader("Content-Type", "application/json");
-
-    const size_t capacity = JSON_OBJECT_SIZE(1) + 38;
-    DynamicJsonDocument retDoc(capacity);
-    retDoc["MAC"] = WiFi.macAddress();
-    String requestBody;
-    serializeJson(retDoc, requestBody);
-    Serial.println(requestBody);
-    int httpResponseCode = http.POST(requestBody);
-    if (httpResponseCode > 0) {
-      String response = http.getString();
-      Serial.println(httpResponseCode);
-      Serial.println(response);
-      //Save to preferences
-      //deserialise
-      DynamicJsonDocument responseDoc(capacity);
-      String json = response;
-      deserializeJson(responseDoc, json);
-      String MAC = responseDoc["MAC"];
-      saveMac(MAC);
-      blinkForever();
-    } else {
-      Serial.println("error");
-    }
-  }
-}
 
 void socket_Connected(const char * payload, size_t length) {
   Serial.println("Socket.IO Connected!");

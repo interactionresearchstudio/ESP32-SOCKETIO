@@ -1,5 +1,5 @@
 /*
-void captiveRoutes() {
+  void captiveRoutes() {
   server.on("/settings", HTTP_GET, []() {
     server.send(200, "application/json", getSettingsAsJson());
   });
@@ -41,9 +41,9 @@ void captiveRoutes() {
       }
     }
   });
-}
+  }
 
-String setSettings() {
+  String setSettings() {
   if (server.args() == 1) {
     StaticJsonDocument<1024> settingsJsonDoc;
     StaticJsonDocument<200> incomingJsonDoc;
@@ -64,21 +64,21 @@ String setSettings() {
   }
 
   return (getSettingsAsJson());
-}
+  }
 
-void setSettings(String json) {
+  void setSettings(String json) {
   preferences.begin("scads", false);
   preferences.putString("json", json);
   preferences.end();
-}
+  }
 
-String clearSettings() {
+  String clearSettings() {
   setSettings("{}");
 
   return (getSettingsAsJson());
-}
+  }
 
-void jsonDeepMerge(JsonVariant dst, JsonVariantConst src) {
+  void jsonDeepMerge(JsonVariant dst, JsonVariantConst src) {
   if (src.is<JsonObject>()) {
     for (auto kvp : src.as<JsonObject>()) {
       jsonDeepMerge(dst.getOrAddMember(kvp.key()), kvp.value());
@@ -87,17 +87,17 @@ void jsonDeepMerge(JsonVariant dst, JsonVariantConst src) {
   else {
     dst.set(src);
   }
-}
+  }
 
-String getSettingsAsJson() {
+  String getSettingsAsJson() {
   preferences.begin("scads", false);
   String settingsJsonAsString = preferences.getString("json", "{}");
   preferences.end();
 
   return (settingsJsonAsString);
-}
+  }
 
-void joinKnownNetworks() {
+  void joinKnownNetworks() {
   JsonObject knownNetworks;
   StaticJsonDocument<1024> settingsJsonDoc;
   if (!deserializeJson(settingsJsonDoc, getSettingsAsJson())) {
@@ -109,9 +109,9 @@ void joinKnownNetworks() {
     Serial.print('\t');
     Serial.println(password);
   }
-}
+  }
 
-String getScan() {
+  String getScan() {
   String jsonString;
 
   StaticJsonDocument<1000> jsonDoc;
@@ -119,9 +119,9 @@ String getScan() {
   serializeJson(jsonDoc[0], jsonString);
 
   return (jsonString);
-}
+  }
 
-void getScanAsJson(JsonDocument& jsonDoc) {
+  void getScanAsJson(JsonDocument& jsonDoc) {
   JsonArray networks = jsonDoc.createNestedArray();
 
   int n = WiFi.scanNetworks();
@@ -134,9 +134,9 @@ void getScanAsJson(JsonDocument& jsonDoc) {
     network["BSSID"] = WiFi.BSSIDstr(i);
     network["RSSI"] = WiFi.RSSI(i);
   }
-}
+  }
 
-String getContentType(String filename) {
+  String getContentType(String filename) {
   if (server.hasArg("download")) return "application/octet-stream";
   else if (filename.endsWith(".htm")) return "text/html";
   else if (filename.endsWith(".html")) return "text/html";
@@ -152,16 +152,16 @@ String getContentType(String filename) {
   else if (filename.endsWith(".gz")) return "application/x-gzip";
   else if (filename.endsWith(".json")) return "";
   return "text/plain";
-}
+  }
 
-String getPath() {
+  String getPath() {
   String path = server.uri();
   if (path.endsWith("/")) path += "index.html";
 
   return (path);
-}
+  }
 
-bool streamFile(String path) {
+  bool streamFile(String path) {
   DBG_OUTPUT_PORT.println("handleFileRead: " + path);
 
   String pathWithGz = path + ".gz";
@@ -174,9 +174,35 @@ bool streamFile(String path) {
     return true;
   }
   return false;
-}
+  }
 
-String getLocalAddress() {
+  String getLocalAddress() {
   return (WiFi.macAddress());
-}
+  }
 */
+
+class CaptiveRequestHandler : public AsyncWebHandler {
+  public:
+    CaptiveRequestHandler() {}
+    virtual ~CaptiveRequestHandler() {}
+
+    bool canHandle(AsyncWebServerRequest *request) {
+      //request->addInterestingHeader("ANY");
+      return true;
+    }
+
+    void handleRequest(AsyncWebServerRequest *request) {
+      AsyncResponseStream *response = request->beginResponseStream("text/html");
+      response->print("<!DOCTYPE html><html><head><title>Captive Portal</title></head><body>");
+      response->print("<p>This is out captive portal front page.</p>");
+      response->printf("<p>You were trying to reach: http://%s%s</p>", request->host().c_str(), request->url().c_str());
+      response->printf("<p>Try opening <a href='http://%s'>this link</a> instead</p>", WiFi.softAPIP().toString().c_str());
+      response->print("</body></html>");
+      request->send(response);
+    }
+};
+
+void setupCaptivePortal() {
+  dnsServer.start(DNS_PORT, "*", apIP);
+ // captiveRoutes();
+}
