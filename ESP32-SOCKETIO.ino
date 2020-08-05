@@ -181,21 +181,11 @@ void createSCADAP() {
 
   server.onRequestBody([](AsyncWebServerRequest * request, uint8_t *data, size_t len, size_t index, size_t total) {
     if (request->url() == "/MAC/") {
-      const size_t capacity = JSON_OBJECT_SIZE(1) + 38;
-      DynamicJsonDocument doc(capacity);
-
-      deserializeJson(doc, (const char*)data);
-      String MAC = doc["MAC"];
-      Serial.println("I JUST RECEIVED");
-      Serial.println(MAC);
-      //save to preferences
-      saveMac(MAC);
-      DynamicJsonDocument returnDoc(capacity);
-      returnDoc["MAC"] = WiFi.macAddress();
-      String requestBody;
-      serializeJson(returnDoc, requestBody);
-      Serial.println(requestBody);
+      if(exchangeMac(request,data)){
       request->send(200, "application/json", requestBody);
+      } else {
+      request->send(404,"text/plain","No MAC");
+      }
       blinkForever();
     }
   });
