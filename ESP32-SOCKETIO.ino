@@ -1,10 +1,17 @@
+#define ROUTER_SSID "XXXX"
+#define ROUTER_PASS "XXXX"
+
 //#define HARDCODE_MAC
 #define STAGING
 
 #define VERSION "v0.1"
 #define ESP32
-#define ROUTER_SSID "XXXX"
-#define ROUTER_PASS "XXXX"
+
+#define MAX_NETWORKS_TO_SCAN 5
+#define DBG_OUTPUT_PORT Serial
+
+#include <AsyncTCP.h>
+#include <ESPAsyncWebServer.h>
 
 #include <SocketIoClient.h>
 #include <Preferences.h>
@@ -12,16 +19,24 @@
 #include <WiFiMulti.h>
 #include <WiFiAP.h>
 #include <WiFiClient.h>
-#include <WebServer.h>
-#include <ESPmDNS.h>
+#include <DNSServer.h>
 #include <ArduinoJson.h>
 #include <HTTPClient.h>
 #include <HTTPUpdate.h>
+#include "SPIFFS.h"
 
 
 //Access Point credentials
 String SCAD_SSID = "";
 String SCAD_PASS = "Password";
+
+const byte DNS_PORT = 53;
+//DNSServer dnsServer;
+IPAddress apIP(192, 168, 1, 1);
+Preferences preferences;
+AsyncWebServer server(80);
+SocketIoClient webSocket;
+WiFiMulti wifiMulti;
 
 bool isClient = false;
 String mac_address = "";
@@ -37,7 +52,7 @@ int buttonPin = 0;
 bool LEDState = false;
 
 /// Socket.IO Settings ///
-#ifndef STAGING 
+#ifndef STAGING
 char host[] = "irs-socket-server.herokuapp.com"; // Socket.IO Server Address
 #else
 char host[] = "irs-socket-server-staging.herokuapp.com"; // Socket.IO Staging Server Address
@@ -46,11 +61,6 @@ int port = 80; // Socket.IO Port Address
 char path[] = "/socket.io/?transport=websocket"; // Socket.IO Base Path
 
 
-SocketIoClient webSocket;
-WiFiMulti wifiMulti;
-Preferences preferences;
-WebServer server(80);
-
 
 void setup() {
   Serial.begin(115200);
@@ -58,6 +68,7 @@ void setup() {
   pinMode(LEDPin, OUTPUT);
   pinMode(buttonPin, INPUT);
 
+  // SPIFFS.begin();
 
 #ifdef HARDCODE_MAC
   mac_address = "TE:ST:TE:ST:TE:ST";
@@ -110,7 +121,7 @@ void setup() {
 void loop() {
 
   if (isClient == false) {
-    server.handleClient();
+    // dnsServer.processNextRequest();
   }
   if (setupFinished == true) {
     webSocket.loop();
@@ -161,83 +172,37 @@ void createSCADAP() {
   SCAD_SSID = "SCAD-" + String((unsigned long)ESP.getEfuseMac(), DEC);
   Serial.print("Wifi name:");
   Serial.println(SCAD_SSID);
+  WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
   WiFi.softAP(SCAD_SSID.c_str(), SCAD_PASS.c_str());
   IPAddress myIP = WiFi.softAPIP();
-  if (MDNS.begin("esp32")) {
-    Serial.println("MDNS responder started");
-  }
-  server.on("/MAC/", HTTP_POST, handleMac);
-  server.onNotFound(handleNotFound);
+  // dnsServer.start(DNS_PORT, "*", apIP);
+
+  //captiveRoutes();
+
+  server.onRequestBody([](AsyncWebServerRequest * request, uint8_t *data, size_t len, size_t index, size_t total) {
+    if (request->url() == "/MAC/") {
+      const size_t capacity = JSON_OBJECT_SIZE(1) + 38;
+      DynamicJsonDocument doc(capacity);
+
+      deserializeJson(doc, (const char*)data);
+      String MAC = doc["MAC"];
+      Serial.println("I JUST RECEIVED");
+      Serial.println(MAC);
+      //save to preferences
+      saveMac(MAC);
+      DynamicJsonDocument returnDoc(capacity);
+      returnDoc["MAC"] = WiFi.macAddress();
+      String requestBody;
+      serializeJson(returnDoc, requestBody);
+      Serial.println(requestBody);
+      request->send(200, "application/json", requestBody);
+      blinkForever();
+    }
+  });
+
+  server.onNotFound(notFound);
   server.begin();
   Serial.println("HTTP server started");
-}
-
-void handleMac() {
-  //Receives client devices MAC and stores to preferences, then returns own MAC
-  const size_t capacity = JSON_OBJECT_SIZE(1) + 38;
-  DynamicJsonDocument doc(capacity);
-  String json = server.arg("plain");
-  deserializeJson(doc, json);
-  String MAC = doc["MAC"];
-  Serial.println(MAC);
-
-  //save to preferences
-  saveMac(MAC);
-  DynamicJsonDocument returnDoc(capacity);
-  returnDoc["MAC"] = WiFi.macAddress();
-  String requestBody;
-  serializeJson(returnDoc, requestBody);
-  Serial.println(requestBody);
-  server.send(200, "application/json", requestBody);
-
-  blinkForever();
-}
-
-void handleNotFound() {
-  String message = "File Not Found\n\n";
-  message += "URI: ";
-  message += server.uri();
-  message += "\nMethod: ";
-  message += (server.method() == HTTP_GET) ? "GET" : "POST";
-  message += "\nArguments: ";
-  message += server.args();
-  message += "\n";
-  for (uint8_t i = 0; i < server.args(); i++) {
-    message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
-  }
-  server.send(404, "text/plain", message);
-}
-
-void postDataToServer() {
-  //Sends Server device MAC address and receives Server device MAC address in return, then saves to preferences.
-  HTTPClient http;
-  if (wifiMulti.run() == WL_CONNECTED) {
-    http.begin("http://192.168.4.1/MAC/");
-    http.addHeader("Content-Type", "application/json");
-
-    const size_t capacity = JSON_OBJECT_SIZE(1) + 38;
-    DynamicJsonDocument retDoc(capacity);
-    retDoc["MAC"] = WiFi.macAddress();
-    String requestBody;
-    serializeJson(retDoc, requestBody);
-    Serial.println(requestBody);
-    int httpResponseCode = http.POST(requestBody);
-    if (httpResponseCode > 0) {
-      String response = http.getString();
-      Serial.println(httpResponseCode);
-      Serial.println(response);
-      //Save to preferences
-      //deserialise
-      DynamicJsonDocument responseDoc(capacity);
-      String json = response;
-      deserializeJson(responseDoc, json);
-      String MAC = responseDoc["MAC"];
-      saveMac(MAC);
-      blinkForever();
-    } else {
-      Serial.println("error");
-    }
-  }
 }
 
 void saveMac(String mac) {
@@ -254,49 +219,6 @@ void blinkForever() {
     digitalWrite(LEDPin, 0);
     delay(500);
   }
-}
-
-void socket_Connected(const char * payload, size_t length) {
-  Serial.println("Socket.IO Connected!");
-  pinMode(LEDPin, OUTPUT);
-  digitalWrite(LEDPin, 1);
-  delay(100);
-  digitalWrite(LEDPin, 0);
-  delay(100);
-}
-
-void socket_sendMac(const char * payload, size_t length) {
-  Serial.println("GOT MAC REQUEST");
-  const size_t capacity = JSON_OBJECT_SIZE(1) + 50;
-  DynamicJsonDocument doc(capacity);
-  doc["macAddress"] = WiFi.macAddress();
-  String bodyReq;
-  serializeJson(doc, bodyReq);
-  Serial.println(bodyReq);
-  webSocket.emit("mac", bodyReq.c_str());
-}
-
-void socket_event(const char * payload, size_t length) {
-  Serial.print("got message: ");
-  Serial.println(payload);
-}
-
-void socket_msg(const char * payload, size_t length) {
-  Serial.println("got msg");
-  const size_t capacity = JSON_OBJECT_SIZE(2) + 50;
-  DynamicJsonDocument incomingDoc(capacity);
-  deserializeJson(incomingDoc, payload);
-  const char* recMacAddress = incomingDoc["macAddress"];
-  const char* recData = incomingDoc["data"];
-  Serial.print("I got a message from ");
-  Serial.println(recMacAddress);
-  Serial.print("Which is ");
-  Serial.println(recData);
-  String testt = String(recData);
-  if (testt.indexOf("hello") > -1) {
-    LEDState = !LEDState;
-  }
-
 }
 
 void checkLEDState() {
@@ -317,7 +239,6 @@ void checkLEDState() {
 
 void checkForUpdate() {
   WiFiClient client;
-
   httpUpdate.setLedPin(LEDPin, LOW);
   String updateHost = "http://" + (String)host + "/update";
   t_httpUpdate_return ret = httpUpdate.update(client, updateHost, VERSION);
