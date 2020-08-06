@@ -7,16 +7,17 @@
 #define VERSION "v0.1"
 #define ESP32
 
-#define MAX_NETWORKS_TO_SCAN 5
 #define DBG_OUTPUT_PORT Serial
 
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 
-//socketIO
+//socketIO 
 #include <SocketIoClient.h>
+/* HAS TO BE INITIALISED BEFORE WEBSOCKETSCLIENT LIB */
 SocketIoClient webSocket;
 
+//Local Websockets
 #include <WebSocketsClient.h>
 
 
@@ -38,13 +39,14 @@ String SCAD_PASS = "Password";
 const byte DNS_PORT = 53;
 DNSServer dnsServer;
 IPAddress apIP(192, 168, 4, 1);
+
 Preferences preferences;
 
-//local server
+//local websockets server
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
 
-//local client
+//local websockets client
 WebSocketsClient localSocket;
 
 
@@ -77,8 +79,6 @@ void setup() {
 
   pinMode(LEDPin, OUTPUT);
   pinMode(buttonPin, INPUT);
-
-  // SPIFFS.begin();
 
 #ifdef HARDCODE_MAC
   mac_address = "TE:ST:TE:ST:TE:ST";

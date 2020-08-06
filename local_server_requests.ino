@@ -69,7 +69,7 @@ void decodeData(const char* data) {
   deserializeJson(doc, (const char*)data);
   if (doc.containsKey("MAC")) {
     String MAC = doc["MAC"];
-    Serial.println("I JUST RECEIVED A MAC");
+    Serial.println("I received a MAC address");
     Serial.println(MAC);
     if (MAC != NULL) {
       //save to preferences
@@ -80,7 +80,7 @@ void decodeData(const char* data) {
   }
   if (doc.containsKey("SSID")) {
     String remoteSSID = doc["SSID"];
-    Serial.println("I JUST RECEIVED A WIFI SSID");
+    Serial.println("I received a SSID");
     Serial.println(remoteSSID);
     if (remoteSSID != NULL) {
       //save to preferences
@@ -90,7 +90,7 @@ void decodeData(const char* data) {
   }
   if (doc.containsKey("PASS")) {
     String remotePASS = doc["PASS"];
-    Serial.println("I JUST RECEIVED A WIFI PASS");
+    Serial.println("I received a Password");
     Serial.println(remotePASS);
     if (remotePASS != NULL) {
       //save to preferences
