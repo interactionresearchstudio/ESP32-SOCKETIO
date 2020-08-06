@@ -47,6 +47,12 @@ void notFound(AsyncWebServerRequest *request) {
 
 //Client local socket
 
+void setupSocketClientEvents() {
+  socket_client.begin("192.168.4.1", 80, "/ws");
+  socket_client.onEvent(webSocketEvent);
+  socket_client.setReconnectInterval(5000);
+}
+
 void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
 
   switch (type) {

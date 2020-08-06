@@ -27,7 +27,6 @@ SocketIoClient socketIO;
 #include <ArduinoJson.h>
 #include <HTTPClient.h>
 #include <HTTPUpdate.h>
-#include "SPIFFS.h"
 
 
 //Access Point credentials
@@ -78,7 +77,6 @@ int port = 80; // Socket.IO Port Address
 char path[] = "/socket.io/?transport=websocket"; // Socket.IO Base Path
 
 
-
 void setup() {
   Serial.begin(115200);
 
@@ -105,34 +103,15 @@ void setup() {
       setupLocalServer();
     } else {
       //become client
-      socket_client.begin("192.168.4.1", 80, "/ws");
-      socket_client.onEvent(webSocketEvent);
-      socket_client.setReconnectInterval(5000);
+      setupSocketClientEvents();
     }
   } else {
     Serial.print("connected to:");
     Serial.println(remote_macAddress);
     //connect to router to talk to server
-    Serial.println("Connecting to Router");
-    wifiMulti.addAP(ROUTER_SSID, ROUTER_PASS);
-    while ((wifiMulti.run() != WL_CONNECTED)) {
-      delay(100);
-      Serial.print(".");
-    }
-    Serial.println("");
-    Serial.println("WiFi connected");
-    Serial.println("IP address: ");
-    Serial.println(WiFi.localIP());
-
+    connectToWifi();
     //checkForUpdate();
-
-    // Setup 'on' listen events
-    socketIO.on("connect", socketIO_Connected);
-    socketIO.on("event", socketIO_event);
-    socketIO.on("send mac", socketIO_sendMac);
-    socketIO.on("msg", socketIO_msg);
-    socketIO.begin(host, port, path);
-
+    setupSocketIOEvents();
     setupFinished = true;
   }
 
@@ -153,103 +132,33 @@ void loop() {
   }
 }
 
-void scanningForSCADS() {
-  // WiFi.scanNetworks will return the number of networks found
-  Serial.println("scan start");
-  int n = WiFi.scanNetworks();
-  Serial.println("scan done");
-  if (n == 0) {
-    Serial.println("no networks found");
-  } else {
-    Serial.print(n);
-    Serial.println(" networks found");
-    for (int i = 0; i < n; ++i) {
-      // Print SSID and RSSI for each network found
-      Serial.print(i + 1);
-      Serial.print(": ");
-      Serial.print(WiFi.SSID(i));
-      Serial.print(" (");
-      Serial.print(WiFi.RSSI(i));
-      Serial.print(")");
-      Serial.println((WiFi.encryptionType(i) == WIFI_AUTH_OPEN) ? " " : "*");
-      delay(10);
-      scads_ssid = WiFi.SSID(i);
-      if (scads_ssid.indexOf("SCADS-") > -1) {
-        Serial.println("Found SCAD");
-        isClient = true;
-        wifiMulti.addAP(scads_ssid.c_str(), scads_pass.c_str());
-        while ((wifiMulti.run() != WL_CONNECTED)) {
-          delay(500);
-          Serial.print(".");
-        }
-        Serial.println("");
-        Serial.println("WiFi connected");
-        Serial.println("IP address: ");
-        Serial.println(WiFi.localIP());
-      }
-    }
-  }
-}
-
-void createSCADSAP() {
-  //Creates Access Point for other device to connect to
-  scads_ssid = "SCADS-" + String((unsigned long)ESP.getEfuseMac(), DEC);
-  Serial.print("Wifi name:");
-  Serial.println(scads_ssid);
-  WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
-  WiFi.softAP(scads_ssid.c_str(), scads_pass.c_str());
-  IPAddress myIP = WiFi.softAPIP();
-  Serial.println(myIP);
-}
-
 void blinkDevice() {
   if (readyToBlink == false) {
     readyToBlink = true;
   }
 }
 
-void ledHandler(){
-  if(readyToBlink == true && isBlinking == false){
+void ledHandler() {
+  if (readyToBlink == true && isBlinking == false) {
     isBlinking = true;
     blinkTime = millis();
-    digitalWrite(LEDPin, 1); 
+    digitalWrite(LEDPin, 1);
   }
-  if(millis() - blinkTime > blinkDuration && isBlinking == true){
-    digitalWrite(LEDPin,0);
+  if (millis() - blinkTime > blinkDuration && isBlinking == true) {
+    digitalWrite(LEDPin, 0);
     isBlinking = false;
     readyToBlink = false;
   }
 }
 
 void testButtonHandler() {
-  const bool buttonState = digitalRead(buttonPin); 
+  const bool buttonState = digitalRead(buttonPin);
   if (!buttonState && buttonDebounce == false) {
     buttonPressTime = millis();
     buttonDebounce = true;
     socketIO_sendButtonPress();
   }
-  if(buttonState && buttonDebounce == true && millis()-buttonPressTime > 500){
+  if (buttonState && buttonDebounce == true && millis() - buttonPressTime > 500) {
     buttonDebounce = false;
-  }
-}
-
-void checkForUpdate() {
-  WiFiClient client;
-  httpUpdate.setLedPin(LEDPin, LOW);
-  String updateHost = "http://" + (String)host + "/update";
-  t_httpUpdate_return ret = httpUpdate.update(client, updateHost, VERSION);
-
-  switch (ret) {
-    case HTTP_UPDATE_FAILED:
-      Serial.println("HTTP_UPDATE_FAILED Error");
-      break;
-
-    case HTTP_UPDATE_NO_UPDATES:
-      Serial.println("HTTP_UPDATE_NO_UPDATES");
-      break;
-
-    case HTTP_UPDATE_OK:
-      Serial.println("HTTP_UPDATE_OK");
-      break;
   }
 }

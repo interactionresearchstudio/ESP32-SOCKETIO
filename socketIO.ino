@@ -53,3 +53,12 @@ void socketIO_sendButtonPress() {
   serializeJson(doc, sender);
   socketIO.emit("msg", sender.c_str());
 }
+
+void setupSocketIOEvents() {
+  // Setup 'on' listen events
+  socketIO.on("connect", socketIO_Connected);
+  socketIO.on("event", socketIO_event);
+  socketIO.on("send mac", socketIO_sendMac);
+  socketIO.on("msg", socketIO_msg);
+  socketIO.begin(host, port, path);
+}
