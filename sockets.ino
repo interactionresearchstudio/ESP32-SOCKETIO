@@ -1,5 +1,4 @@
 //Local socket server
-
 void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len) {
 
   if (type == WS_EVT_CONNECT) {
@@ -26,11 +25,20 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
 }
 
 void setupLocalServer() {
-  ws.onEvent(onWsEvent);
-  server.addHandler(&ws);
+  socket_server.onEvent(onWsEvent);
+  server.addHandler(&socket_server);
   server.addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER);//only when requested from AP
   server.begin();
   Serial.println("Local Socket server started");
+}
+
+void resetBoards() {
+  socket_server.textAll("RESTART");
+  //Not sure if this is needed
+  long softReset = millis();
+  while (millis() - softReset < 1000) {
+  }
+  ESP.restart();
 }
 
 void notFound(AsyncWebServerRequest *request) {
@@ -38,6 +46,12 @@ void notFound(AsyncWebServerRequest *request) {
 }
 
 //Client local socket
+
+void setupSocketClientEvents() {
+  socket_client.begin("192.168.4.1", 80, "/ws");
+  socket_client.onEvent(webSocketEvent);
+  socket_client.setReconnectInterval(5000);
+}
 
 void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
 
@@ -53,61 +67,12 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
       Serial.println((const char *)payload);
       String pay = (const char *)payload;
       if (pay == "MAC") {
-        localSocket.sendTXT(returnJSONMac().c_str());
+        socket_client.sendTXT(returnJSONMac().c_str());
+      } else if (pay == "RESTART") {
+        ESP.restart();
       } else {
         decodeData((const char*)payload);
       }
       break;
   }
-}
-
-//JSON Data handling
-
-void decodeData(const char* data) {
-  const size_t capacity = JSON_OBJECT_SIZE(3) + 40;
-  DynamicJsonDocument doc(capacity);
-  deserializeJson(doc, (const char*)data);
-  if (doc.containsKey("MAC")) {
-    String MAC = doc["MAC"];
-    Serial.println("I received a MAC address");
-    Serial.println(MAC);
-    if (MAC != NULL) {
-      //save to preferences
-      saveMac(MAC);
-    } else {
-      Serial.println("remote MAC address incorrect");
-    }
-  }
-  if (doc.containsKey("SSID")) {
-    String remoteSSID = doc["SSID"];
-    Serial.println("I received a SSID");
-    Serial.println(remoteSSID);
-    if (remoteSSID != NULL) {
-      //save to preferences
-    } else {
-      Serial.println("remote ssid empty");
-    }
-  }
-  if (doc.containsKey("PASS")) {
-    String remotePASS = doc["PASS"];
-    Serial.println("I received a Password");
-    Serial.println(remotePASS);
-    if (remotePASS != NULL) {
-      //save to preferences
-    } else {
-      Serial.println("remote pass empty");
-    }
-  }
-}
-
-String returnJSONMac() {
-  const size_t capacity = JSON_OBJECT_SIZE(3) + 40;
-  DynamicJsonDocument returnDoc(capacity);
-  returnDoc["MAC"] = WiFi.macAddress();
-  returnDoc["SSID"] = "testSsid";
-  returnDoc["PASS"] = "testPass";
-  String requestBody;
-  serializeJson(returnDoc, requestBody);
-  Serial.println(requestBody);
-  return (requestBody);
 }

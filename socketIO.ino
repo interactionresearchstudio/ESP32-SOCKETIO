@@ -1,5 +1,5 @@
 
-void socket_Connected(const char * payload, size_t length) {
+void socketIO_Connected(const char * payload, size_t length) {
   Serial.println("Socket.IO Connected!");
   pinMode(LEDPin, OUTPUT);
   digitalWrite(LEDPin, 1);
@@ -8,7 +8,7 @@ void socket_Connected(const char * payload, size_t length) {
   delay(100);
 }
 
-void socket_sendMac(const char * payload, size_t length) {
+void socketIO_sendMac(const char * payload, size_t length) {
   Serial.println("GOT MAC REQUEST");
   const size_t capacity = JSON_OBJECT_SIZE(1) + 50;
   DynamicJsonDocument doc(capacity);
@@ -16,15 +16,15 @@ void socket_sendMac(const char * payload, size_t length) {
   String bodyReq;
   serializeJson(doc, bodyReq);
   Serial.println(bodyReq);
-  webSocket.emit("mac", bodyReq.c_str());
+  socketIO.emit("mac", bodyReq.c_str());
 }
 
-void socket_event(const char * payload, size_t length) {
+void socketIO_event(const char * payload, size_t length) {
   Serial.print("got message: ");
   Serial.println(payload);
 }
 
-void socket_msg(const char * payload, size_t length) {
+void socketIO_msg(const char * payload, size_t length) {
   Serial.println("got msg");
   const size_t capacity = JSON_OBJECT_SIZE(2) + 50;
   DynamicJsonDocument incomingDoc(capacity);
@@ -37,7 +37,28 @@ void socket_msg(const char * payload, size_t length) {
   Serial.println(recData);
   String testt = String(recData);
   if (testt.indexOf("hello") > -1) {
-    LEDState = !LEDState;
+    //LEDState = !LEDState;
+    blinkDevice();
   }
 
+}
+
+void socketIO_sendButtonPress() {
+  Serial.println("button send");
+  const size_t capacity = JSON_OBJECT_SIZE(2) + 50;
+  DynamicJsonDocument doc(capacity);
+  doc["macAddress"] = remote_macAddress;
+  doc["data"] = "hello";
+  String sender;
+  serializeJson(doc, sender);
+  socketIO.emit("msg", sender.c_str());
+}
+
+void setupSocketIOEvents() {
+  // Setup 'on' listen events
+  socketIO.on("connect", socketIO_Connected);
+  socketIO.on("event", socketIO_event);
+  socketIO.on("send mac", socketIO_sendMac);
+  socketIO.on("msg", socketIO_msg);
+  socketIO.begin(host, port, path);
 }

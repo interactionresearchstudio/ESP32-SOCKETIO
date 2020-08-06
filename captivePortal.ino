@@ -8,15 +8,10 @@ class CaptiveRequestHandler : public AsyncWebHandler {
     }
 
     void handleRequest(AsyncWebServerRequest *request) {
-      request->send(SPIFFS, "/test.html");
+      request->send(200,"text/plain", "Hello World!");
     }
 };
 
 void setupCaptivePortal() {
-  // Initialize SPIFFS
-  if (!SPIFFS.begin(true)) {
-    Serial.println("An Error has occurred while mounting SPIFFS");
-    return;
-  }
   dnsServer.start(DNS_PORT, "*", apIP);
 }
