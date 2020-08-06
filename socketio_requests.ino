@@ -37,7 +37,8 @@ void socketIO_msg(const char * payload, size_t length) {
   Serial.println(recData);
   String testt = String(recData);
   if (testt.indexOf("hello") > -1) {
-    LEDState = !LEDState;
+    //LEDState = !LEDState;
+    blinkDevice();
   }
 
 }

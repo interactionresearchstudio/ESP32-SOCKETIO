@@ -60,6 +60,13 @@ unsigned long prevMillis;
 int LEDPin = 2;
 int buttonPin = 0;
 bool LEDState = false;
+bool isBlinking = false;
+bool readyToBlink = false;
+unsigned long blinkTime;
+int blinkDuration = 200;
+
+bool buttonDebounce;
+unsigned long buttonPressTime;
 
 /// Socket.IO Settings ///
 #ifndef STAGING
@@ -141,7 +148,8 @@ void loop() {
   }
   if (setupFinished == true) {
     socketIO.loop();
-    checkLEDState();
+    testButtonHandler();
+    ledHandler();
   }
 }
 
@@ -194,15 +202,36 @@ void createSCADSAP() {
   Serial.println(myIP);
 }
 
-void checkLEDState() {
-  digitalWrite(LEDPin, LEDState);
-  const bool newState = digitalRead(buttonPin); // See if button is physically pushed
-  if (!newState) {
-    socketIO_sendButtonPress();
-    delay(500);
+void blinkDevice() {
+  if (readyToBlink == false) {
+    readyToBlink = true;
   }
 }
 
+void ledHandler(){
+  if(readyToBlink == true && isBlinking == false){
+    isBlinking = true;
+    blinkTime = millis();
+    digitalWrite(LEDPin, 1); 
+  }
+  if(millis() - blinkTime > blinkDuration && isBlinking == true){
+    digitalWrite(LEDPin,0);
+    isBlinking = false;
+    readyToBlink = false;
+  }
+}
+
+void testButtonHandler() {
+  const bool buttonState = digitalRead(buttonPin); 
+  if (!buttonState && buttonDebounce == false) {
+    buttonPressTime = millis();
+    buttonDebounce = true;
+    socketIO_sendButtonPress();
+  }
+  if(buttonState && buttonDebounce == true && millis()-buttonPressTime > 500){
+    buttonDebounce = false;
+  }
+}
 
 void checkForUpdate() {
   WiFiClient client;
