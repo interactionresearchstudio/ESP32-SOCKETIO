@@ -7,15 +7,13 @@
 #define VERSION "v0.1"
 #define ESP32
 
-#define DBG_OUTPUT_PORT Serial
-
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 
-//socketIO 
+//socketIO
 #include <SocketIoClient.h>
 /* HAS TO BE INITIALISED BEFORE WEBSOCKETSCLIENT LIB */
-SocketIoClient webSocket;
+SocketIoClient socketIO;
 
 //Local Websockets
 #include <WebSocketsClient.h>
@@ -33,8 +31,8 @@ SocketIoClient webSocket;
 
 
 //Access Point credentials
-String SCAD_SSID = "";
-String SCAD_PASS = "Password";
+String scads_ssid = "";
+String scads_pass = "Password";
 
 const byte DNS_PORT = 53;
 DNSServer dnsServer;
@@ -42,18 +40,18 @@ IPAddress apIP(192, 168, 4, 1);
 
 Preferences preferences;
 
-//local websockets server
+//local server
 AsyncWebServer server(80);
-AsyncWebSocket ws("/ws");
+AsyncWebSocket socket_server("/ws");
 
 //local websockets client
-WebSocketsClient localSocket;
+WebSocketsClient socket_client;
 
 
 WiFiMulti wifiMulti;
 
 bool isClient = false;
-String mac_address = "";
+String remote_macAddress = "";
 bool setupFinished = false;
 unsigned long prevMillis;
 
@@ -81,31 +79,32 @@ void setup() {
   pinMode(buttonPin, INPUT);
 
 #ifdef HARDCODE_MAC
-  mac_address = "TE:ST:TE:ST:TE:ST";
+  remote_macAddress = "TE:ST:TE:ST:TE:ST";
 #else if
   //Check if device already has a pair macaddress
   preferences.begin("scads", false);
-  mac_address = preferences.getString("user_mac", "");
+  remote_macAddress = preferences.getString("mac", "");
+  Serial.println(remote_macAddress);
   preferences.end();
 #endif
 
-  if (mac_address == "") {
+  if (remote_macAddress == "") {
     Serial.println("Scanning for available SCADS");
-    scanningForSCAD();
+    scanningForSCADS();
     if (isClient == false) {
       Serial.println("No available SCAD Network, creating AP and server");
-      createSCADAP();
+      createSCADSAP();
       setupCaptivePortal();
       setupLocalServer();
     } else {
       //become client
-      localSocket.begin("192.168.4.1", 80, "/ws");
-      localSocket.onEvent(webSocketEvent);
-      localSocket.setReconnectInterval(5000);
+      socket_client.begin("192.168.4.1", 80, "/ws");
+      socket_client.onEvent(webSocketEvent);
+      socket_client.setReconnectInterval(5000);
     }
   } else {
     Serial.print("connected to:");
-    Serial.println(mac_address);
+    Serial.println(remote_macAddress);
     //connect to router to talk to server
     Serial.println("Connecting to Router");
     wifiMulti.addAP(ROUTER_SSID, ROUTER_PASS);
@@ -121,11 +120,11 @@ void setup() {
     //checkForUpdate();
 
     // Setup 'on' listen events
-    webSocket.on("connect", socket_Connected);
-    webSocket.on("event", socket_event);
-    webSocket.on("send mac", socket_sendMac);
-    webSocket.on("msg", socket_msg);
-    webSocket.begin(host, port, path);
+    socketIO.on("connect", socketIO_Connected);
+    socketIO.on("event", socketIO_event);
+    socketIO.on("send mac", socketIO_sendMac);
+    socketIO.on("msg", socketIO_msg);
+    socketIO.begin(host, port, path);
 
     setupFinished = true;
   }
@@ -135,18 +134,18 @@ void setup() {
 void loop() {
 
   if (isClient == false) {
-    ws.cleanupClients();
+    socket_server.cleanupClients();
     dnsServer.processNextRequest();
   } else if (isClient == true && setupFinished == false) {
-    localSocket.loop();
+    socket_client.loop();
   }
   if (setupFinished == true) {
-    webSocket.loop();
+    socketIO.loop();
     checkLEDState();
   }
 }
 
-void scanningForSCAD() {
+void scanningForSCADS() {
   // WiFi.scanNetworks will return the number of networks found
   Serial.println("scan start");
   int n = WiFi.scanNetworks();
@@ -166,11 +165,11 @@ void scanningForSCAD() {
       Serial.print(")");
       Serial.println((WiFi.encryptionType(i) == WIFI_AUTH_OPEN) ? " " : "*");
       delay(10);
-      SCAD_SSID = WiFi.SSID(i);
-      if (SCAD_SSID.indexOf("SCAD-") > -1) {
+      scads_ssid = WiFi.SSID(i);
+      if (scads_ssid.indexOf("SCADS-") > -1) {
         Serial.println("Found SCAD");
         isClient = true;
-        wifiMulti.addAP(SCAD_SSID.c_str(), SCAD_PASS.c_str());
+        wifiMulti.addAP(scads_ssid.c_str(), scads_pass.c_str());
         while ((wifiMulti.run() != WL_CONNECTED)) {
           delay(500);
           Serial.print(".");
@@ -184,45 +183,22 @@ void scanningForSCAD() {
   }
 }
 
-void createSCADAP() {
+void createSCADSAP() {
   //Creates Access Point for other device to connect to
-  SCAD_SSID = "SCAD-" + String((unsigned long)ESP.getEfuseMac(), DEC);
+  scads_ssid = "SCADS-" + String((unsigned long)ESP.getEfuseMac(), DEC);
   Serial.print("Wifi name:");
-  Serial.println(SCAD_SSID);
+  Serial.println(scads_ssid);
   WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
-  WiFi.softAP(SCAD_SSID.c_str(), SCAD_PASS.c_str());
+  WiFi.softAP(scads_ssid.c_str(), scads_pass.c_str());
   IPAddress myIP = WiFi.softAPIP();
   Serial.println(myIP);
-}
-
-void saveMac(String mac) {
-  preferences.begin("scads", false);
-  preferences.putString("user_mac", mac);
-  Serial.println("Saved mac to nvm");
-  preferences.end();
-}
-
-void blinkForever() {
-  while (1) {
-    digitalWrite(LEDPin, 1);
-    delay(500);
-    digitalWrite(LEDPin, 0);
-    delay(500);
-  }
 }
 
 void checkLEDState() {
   digitalWrite(LEDPin, LEDState);
   const bool newState = digitalRead(buttonPin); // See if button is physically pushed
   if (!newState) {
-    Serial.println("button send");
-    const size_t capacity = JSON_OBJECT_SIZE(2) + 50;
-    DynamicJsonDocument doc(capacity);
-    doc["macAddress"] = mac_address;
-    doc["data"] = "hello";
-    String sender;
-    serializeJson(doc, sender);
-    webSocket.emit("msg", sender.c_str());
+    socketIO_sendButtonPress();
     delay(500);
   }
 }
