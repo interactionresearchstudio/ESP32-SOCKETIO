@@ -28,6 +28,20 @@ void setupLocalServer() {
   socket_server.onEvent(onWsEvent);
   server.addHandler(&socket_server);
   server.addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER);//only when requested from AP
+  
+  server.on("/credentials", HTTP_POST, [](AsyncWebServerRequest * request) {
+    // TODO - Get credentials here.
+    request->send(200, "text/plain", "OK");
+  });
+
+  server.on("/mac", HTTP_GET, [](AsyncWebServerRequest * request) {
+    request->send(200, "text/plain", WiFi.macAddress());
+  });
+
+  server.on("/status", HTTP_GET, [](AsyncWebServerRequest * request) {
+    request->send(200, "text/plain", getDeviceStatus());
+  });
+  
   server.begin();
   Serial.println("Local Socket server started");
 }
@@ -75,4 +89,13 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
       }
       break;
   }
+}
+
+String getDeviceStatus() {
+  /*
+   * If we are currently pairing, return "pairing"
+   * If we have already paired, return "paired"
+   * If there is no other device in sight and we haven't paired, return "detached"
+   */
+  return "pairing";
 }

@@ -5,7 +5,7 @@
 #define STAGING
 
 #define VERSION "v0.1"
-#define ESP32
+#define ESP32set
 
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
