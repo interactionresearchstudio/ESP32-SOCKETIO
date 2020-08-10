@@ -8,10 +8,24 @@ class CaptiveRequestHandler : public AsyncWebHandler {
     }
 
     void handleRequest(AsyncWebServerRequest *request) {
-      request->send(200,"text/plain", "Hello World!");
+      request->send(200, "text/plain", "Hello World!");
     }
 };
 
 void setupCaptivePortal() {
   dnsServer.start(DNS_PORT, "*", apIP);
+}
+
+void notFound(AsyncWebServerRequest *request) {
+  request->send(404, "text/plain", "Not found");
+}
+
+
+String getDeviceStatus() {
+  /*
+   * If we are currently pairing, return "pairing"
+   * If we have already paired, return "paired"
+   * If there is no other device in sight and we haven't paired, return "detached"
+   */
+  return "pairing";
 }

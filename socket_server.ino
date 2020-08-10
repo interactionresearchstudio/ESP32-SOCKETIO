@@ -2,11 +2,11 @@
 void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len) {
 
   if (type == WS_EVT_CONNECT) {
-
+    connection = pairing;
     Serial.println("Websocket client connection received");
     client->text("MAC");
+    webSocketClientID = client->id();
     Serial.println(client->id());
-
   } else if (type == WS_EVT_DISCONNECT) {
     Serial.println("Client disconnected");
   } else if (type == WS_EVT_DATA) {
@@ -18,10 +18,16 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
         data[len] = 0;
         Serial.println((const char*)data);
         decodeData((const char*)data);
-        client->text(returnJSONMac().c_str());
+        client->text(getJSONMac().c_str());
       }
     }
   }
+}
+
+void sendWifiCredentials() {
+  //socket_server.text(webSocketClientID, (char*)text);
+ // okay while we only have 1 client
+ // socket_server.textAll(getWifiJSON());
 }
 
 void setupLocalServer() {
@@ -39,40 +45,4 @@ void resetBoards() {
   while (millis() - softReset < 1000) {
   }
   ESP.restart();
-}
-
-void notFound(AsyncWebServerRequest *request) {
-  request->send(404, "text/plain", "Not found");
-}
-
-//Client local socket
-
-void setupSocketClientEvents() {
-  socket_client.begin("192.168.4.1", 80, "/ws");
-  socket_client.onEvent(webSocketEvent);
-  socket_client.setReconnectInterval(5000);
-}
-
-void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
-
-  switch (type) {
-    case WStype_DISCONNECTED:
-      Serial.println("[WSc] Disconnected!\n");
-      break;
-    case WStype_CONNECTED:
-      Serial.println("Connected!");
-      break;
-    case WStype_TEXT:
-      Serial.println("Text:");
-      Serial.println((const char *)payload);
-      String pay = (const char *)payload;
-      if (pay == "MAC") {
-        socket_client.sendTXT(returnJSONMac().c_str());
-      } else if (pay == "RESTART") {
-        ESP.restart();
-      } else {
-        decodeData((const char*)payload);
-      }
-      break;
-  }
 }

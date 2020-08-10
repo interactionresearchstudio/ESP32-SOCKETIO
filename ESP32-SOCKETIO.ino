@@ -1,5 +1,10 @@
-#define ROUTER_SSID "XXXX"
-#define ROUTER_PASS "XXXX"
+enum connectionStatus {
+  pairing,
+  paired,
+  detached
+};
+
+connectionStatus connection = detached;
 
 //#define HARDCODE_MAC
 #define STAGING
@@ -33,6 +38,8 @@ SocketIoClient socketIO;
 String scads_ssid = "";
 String scads_pass = "Password";
 
+byte webSocketClientID = 0;
+
 const byte DNS_PORT = 53;
 DNSServer dnsServer;
 IPAddress apIP(192, 168, 4, 1);
@@ -50,7 +57,10 @@ WebSocketsClient socket_client;
 WiFiMulti wifiMulti;
 
 bool isClient = false;
+String wifiCredentials = "";
+String macCredentials = "";
 String remote_macAddress = "";
+
 bool setupFinished = false;
 unsigned long prevMillis;
 
@@ -58,7 +68,6 @@ unsigned long prevMillis;
 /// Pin Settings ///
 int LEDPin = 2;
 int buttonPin = 0;
-bool LEDState = false;
 bool isBlinking = false;
 bool readyToBlink = false;
 unsigned long blinkTime;
@@ -88,12 +97,14 @@ void setup() {
 #else if
   //Check if device already has a pair macaddress
   preferences.begin("scads", false);
-  remote_macAddress = preferences.getString("mac", "");
-  Serial.println(remote_macAddress);
+  wifiCredentials = preferences.getString("wifi", "");
+  macCredentials = preferences.getString("mac", "");
+  Serial.println(wifiCredentials);
+  Serial.println(macCredentials);
   preferences.end();
 #endif
 
-  if (remote_macAddress == "") {
+  if (wifiCredentials == "" && macCredentials == "") {
     Serial.println("Scanning for available SCADS");
     scanningForSCADS();
     if (isClient == false) {
@@ -101,6 +112,7 @@ void setup() {
       createSCADSAP();
       setupCaptivePortal();
       setupLocalServer();
+      connection = detached;
     } else {
       //become client
       setupSocketClientEvents();
@@ -109,7 +121,8 @@ void setup() {
     Serial.print("connected to:");
     Serial.println(remote_macAddress);
     //connect to router to talk to server
-    connectToWifi();
+    connection = paired;
+    connectToWifi(wifiCredentials);
     //checkForUpdate();
     setupSocketIOEvents();
     setupFinished = true;
@@ -148,6 +161,16 @@ void ledHandler() {
     digitalWrite(LEDPin, 0);
     isBlinking = false;
     readyToBlink = false;
+  }
+}
+
+void blinkOnConnect() {
+  byte NUM_BLINKS = 3;
+  for (byte i = 0; i < NUM_BLINKS; i++) {
+    digitalWrite(LEDPin, 1);
+    delay(100);
+    digitalWrite(LEDPin, 0);
+    delay(400);
   }
 }
 
