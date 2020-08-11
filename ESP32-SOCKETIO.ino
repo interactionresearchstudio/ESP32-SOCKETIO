@@ -4,7 +4,7 @@ enum connectionStatus {
   detached
 };
 
-connectionStatus connection = detached;
+int connection = 0;
 
 #define VERSION "v0.2"
 #define ESP32set
@@ -104,6 +104,7 @@ void setup() {
       Serial.println("Already have local mac address in preferences, but nothing else");
     } else {
       hasPairedMac = true;
+      connection = 2;
       Serial.println("Already has paired mac address");
     }
   } else {
@@ -120,7 +121,6 @@ void setup() {
       createSCADSAP();
       setupCaptivePortal();
       setupLocalServer();
-      connection = detached;
     } else {
       //become client
       setupSocketClientEvents();
@@ -129,11 +129,11 @@ void setup() {
     Serial.print("List of Mac addresses:");
     Serial.println(macCredentials);
     //connect to router to talk to server
-    connection = paired;
     if (wifiCredentials != "") {
       connectToWifi(wifiCredentials);
       setupSocketIOEvents();
       setupFinished = true;
+      Serial.println("setup complete");
     } else {
       Serial.println("wifi setup failed, clearing credentials for you to please try again");
       preferences.begin("scads", false);
@@ -150,9 +150,12 @@ void loop() {
     //Local Server Mode
     socket_server.cleanupClients();
     dnsServer.processNextRequest();
-  } else if (isClient == true && setupFinished == false) {
+    checkReset();
+  }
+  if (isClient == true && setupFinished == false) {
     //Local Client Mode
     socket_client.loop();
+    checkReset();
   } else if (setupFinished == true) {
     //Connected Mode
     socketIO.loop();
@@ -193,11 +196,32 @@ void blinkOnConnect() {
 void buttonHandler() {
   const bool buttonState = digitalRead(buttonPin);
   if (!buttonState && buttonDebounce == false) {
+    Serial.println("button pressed");
     buttonPressTime = millis();
     buttonDebounce = true;
     socketIO_sendButtonPress();
   }
   if (buttonState && buttonDebounce == true && millis() - buttonPressTime > 500) {
     buttonDebounce = false;
+  }
+}
+
+bool isResetting = false;
+unsigned long resetTime;
+int resetLength = 4000;
+
+void softReset() {
+  if (isResetting == false) {
+    isResetting = true;
+    resetTime = millis();
+  }
+
+}
+
+void checkReset() {
+  if (isResetting) {
+    if (millis() - resetTime > resetLength) {
+      ESP.restart();
+    }
   }
 }

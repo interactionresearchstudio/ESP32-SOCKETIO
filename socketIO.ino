@@ -56,4 +56,5 @@ void setupSocketIOEvents() {
   socketIO.on("send mac", socketIO_sendMac);
   socketIO.on("msg", socketIO_msg);
   socketIO.begin(host, port, path);
+  Serial.println("attached socketio listeners");
 }

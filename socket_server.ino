@@ -2,7 +2,7 @@
 void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len) {
 
   if (type == WS_EVT_CONNECT) {
-    connection = pairing;
+    connection = 1;
     Serial.println("Websocket client connection received");
     webSocketClientID = client->id();
     Serial.println(client->id());
@@ -43,7 +43,7 @@ void setupLocalServer() {
 
 void resetBoards() {
   long softReset = millis();
-  while (millis() - softReset < 2000) {
+  while (millis() - softReset < 3000) {
   }
   ESP.restart();
 }

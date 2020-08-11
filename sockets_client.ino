@@ -11,7 +11,7 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
   switch (type) {
     case WStype_DISCONNECTED:
       Serial.println("[WSc] Disconnected!\n");
-     // ESP.restart();
+      // ESP.restart();
       break;
     case WStype_CONNECTED:
       Serial.println("Connected!");
@@ -20,7 +20,12 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
     case WStype_TEXT:
       Serial.println("Text:");
       Serial.println((char *)payload);
-      decodeData((char *)payload);
+      if ((String)(char *)payload == "RESTART") {
+        softReset();
+        Serial.println("i'm going to reset");
+      } else {
+        decodeData((char *)payload);
+      }
       break;
   }
 }

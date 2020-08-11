@@ -8,7 +8,6 @@ void decodeData(const char* data) {
   DynamicJsonDocument doc(capacity);
   deserializeJson(doc, (const char*)data);
   if (doc.containsKey("mac")) {
-    connection = paired;
     JsonArray mac = doc["mac"];
     String MAC = mac[0];
     Serial.println("I received a MAC address");

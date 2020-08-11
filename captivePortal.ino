@@ -1,4 +1,8 @@
-
+String remote_ssid = "";
+String remote_pass = "";
+String local_ssid = "";
+String local_pass = "";
+String remote_mac = "";
 
 class CaptiveRequestHandler : public AsyncWebHandler {
   public:
@@ -33,10 +37,47 @@ class CaptiveRequestHandler : public AsyncWebHandler {
             Serial.printf("POST[%s]: %s", p->name().c_str(), p->value().c_str());
           } else {
             Serial.printf("GET[%s]: %s", p->name().c_str(), p->value().c_str());
+            Serial.println();
+            String in = (String)p->name();
+            Serial.println(in);
+            if (in == "local_ssid") {
+              Serial.println("got local ssid");
+              local_ssid = (String)p->value();
+            } else if (in ==  "local_pass") {
+              Serial.println("got local pass");
+              local_pass = (String)p->value();
+            } else if (in == "remote_ssid") {
+              Serial.println("got remote ssid");
+              remote_ssid = (String)p->value();
+            } else if (in == "remote_pass") {
+              Serial.println("got remote pass");
+              remote_pass = (String)p->value();
+            } else if (in == "remote_mac") {
+              Serial.println("got remote mac");
+              remote_mac = (String)p->value();
+            }
           }
           Serial.println();
         }
+        if (remote_mac != "") {
+          addToMacAddressJSON(remote_mac);
+        }
+        if (remote_pass != "" && remote_ssid != "" && local_ssid != "" && local_pass != "") {
+          addToWiFiJSON(local_ssid, local_pass);
+          addToWiFiJSON(remote_ssid, remote_pass);
+          sendWifiCredentials();
+          socket_server.textAll("RESTART");
+          softReset();
+        } else if (local_pass != "" && local_ssid != "") {
+          addToWiFiJSON(local_ssid, local_pass);
+          sendWifiCredentials();
+          socket_server.textAll("RESTART");
+          softReset();
+        }
+
         request->send(200, "text/html", "<h1>Success! You can now disconnect from this network.</h1>");
+
+
       }
       else {
         AsyncResponseStream *response = request->beginResponseStream("text/html");
@@ -71,29 +112,9 @@ int getDeviceStatus() {
      1: pairing
      2: paired
   */
-  return 0;
+  return connection;
 }
 
 void setupCaptivePortal() {
   dnsServer.start(DNS_PORT, "*", apIP);
-}
-
-void notFound(AsyncWebServerRequest *request) {
-  request->send(404, "text/plain", "Not found");
-}
-
-
-String getDeviceStatus() {
-  /*
-     If we are currently pairing, return "pairing"
-     If we have already paired, return "paired"
-     If there is no other device in sight and we haven't paired, return "detached"
-  */
-  if (connection == pairing) {
-    return "pairing";
-  } else if (connection == paired) {
-    return "paired";
-  } else if (connection == detached) {
-    return "detached";
-  }
 }
