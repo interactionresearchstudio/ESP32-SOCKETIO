@@ -4,7 +4,6 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
   if (type == WS_EVT_CONNECT) {
     connection = pairing;
     Serial.println("Websocket client connection received");
-    client->text("MAC");
     webSocketClientID = client->id();
     Serial.println(client->id());
   } else if (type == WS_EVT_DISCONNECT) {
@@ -16,18 +15,22 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
       Serial.println(client->id());
       if (info->opcode == WS_TEXT) {
         data[len] = 0;
-        Serial.println((const char*)data);
-        decodeData((const char*)data);
-        client->text(getJSONMac().c_str());
+        Serial.println((char*)data);
+        decodeData((char*)data);
       }
     }
   }
 }
 
+void sendMacJSON() {
+  socket_server.textAll(getJSONMac());
+  Serial.println("Sending mac addresses");
+}
+
 void sendWifiCredentials() {
   //socket_server.text(webSocketClientID, (char*)text);
- // okay while we only have 1 client
- // socket_server.textAll(getWifiJSON());
+  // okay while we only have 1 client
+  socket_server.textAll(getJSONWifi());
 }
 
 void setupLocalServer() {
@@ -39,10 +42,8 @@ void setupLocalServer() {
 }
 
 void resetBoards() {
-  socket_server.textAll("RESTART");
-  //Not sure if this is needed
   long softReset = millis();
-  while (millis() - softReset < 1000) {
+  while (millis() - softReset < 2000) {
   }
   ESP.restart();
 }

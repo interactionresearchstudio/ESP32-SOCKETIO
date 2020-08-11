@@ -1,3 +1,5 @@
+
+
 class CaptiveRequestHandler : public AsyncWebHandler {
   public:
     CaptiveRequestHandler() {}
@@ -23,9 +25,15 @@ void notFound(AsyncWebServerRequest *request) {
 
 String getDeviceStatus() {
   /*
-   * If we are currently pairing, return "pairing"
-   * If we have already paired, return "paired"
-   * If there is no other device in sight and we haven't paired, return "detached"
-   */
-  return "pairing";
+     If we are currently pairing, return "pairing"
+     If we have already paired, return "paired"
+     If there is no other device in sight and we haven't paired, return "detached"
+  */
+  if (connection == pairing) {
+    return "pairing";
+  } else if (connection == paired) {
+    return "paired";
+  } else if (connection == detached) {
+    return "detached";
+  }
 }

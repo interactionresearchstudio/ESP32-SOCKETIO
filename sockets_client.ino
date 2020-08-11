@@ -11,21 +11,16 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
   switch (type) {
     case WStype_DISCONNECTED:
       Serial.println("[WSc] Disconnected!\n");
+     // ESP.restart();
       break;
     case WStype_CONNECTED:
       Serial.println("Connected!");
+      socket_client.sendTXT(getJSONMac().c_str());
       break;
     case WStype_TEXT:
       Serial.println("Text:");
-      Serial.println((const char *)payload);
-      String pay = (const char *)payload;
-      if (pay == "MAC") {
-        socket_client.sendTXT(getJSONMac().c_str());
-      } else if (pay == "RESTART") {
-        ESP.restart();
-      } else {
-        Serial.println("data format error");
-      }
+      Serial.println((char *)payload);
+      decodeData((char *)payload);
       break;
   }
 }

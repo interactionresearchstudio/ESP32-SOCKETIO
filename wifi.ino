@@ -64,7 +64,14 @@ void connectToWifi(String credentials) {
   }
 
   Serial.println("Connecting to Router");
+  
+  long wifiMillis = millis();
   while ((wifiMulti.run() != WL_CONNECTED)) {
+    if (millis() - wifiMillis > WIFICONNECTTIMEOUT) {
+      preferences.begin("scads", false);
+      preferences.putString("wifi", "");
+      preferences.end();
+    }
     delay(100);
     Serial.print(".");
   }
@@ -72,26 +79,4 @@ void connectToWifi(String credentials) {
   Serial.println("WiFi connected");
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
-  blinkOnConnect();
-}
-
-void checkForUpdate() {
-  WiFiClient client;
-  httpUpdate.setLedPin(LEDPin, LOW);
-  String updateHost = "http://" + (String)host + "/update";
-  t_httpUpdate_return ret = httpUpdate.update(client, updateHost, VERSION);
-
-  switch (ret) {
-    case HTTP_UPDATE_FAILED:
-      Serial.println("HTTP_UPDATE_FAILED Error");
-      break;
-
-    case HTTP_UPDATE_NO_UPDATES:
-      Serial.println("HTTP_UPDATE_NO_UPDATES");
-      break;
-
-    case HTTP_UPDATE_OK:
-      Serial.println("HTTP_UPDATE_OK");
-      break;
-  }
 }
