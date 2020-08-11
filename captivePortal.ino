@@ -25,7 +25,6 @@ class CaptiveRequestHandler : public AsyncWebHandler {
       Serial.print(request->url());
       Serial.print(" type: ");
       Serial.println(request->method());
-
       if (request->url() == "/credentials") {
         Serial.println("Received credentials");
         int params = request->params();
@@ -76,8 +75,6 @@ class CaptiveRequestHandler : public AsyncWebHandler {
         }
 
         request->send(200, "text/html", "<h1>Success! You can now disconnect from this network.</h1>");
-
-
       }
       else {
         AsyncResponseStream *response = request->beginResponseStream("text/html");

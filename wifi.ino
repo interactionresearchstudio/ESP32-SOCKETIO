@@ -64,7 +64,7 @@ void connectToWifi(String credentials) {
   }
 
   Serial.println("Connecting to Router");
-  
+
   long wifiMillis = millis();
   while ((wifiMulti.run() != WL_CONNECTED)) {
     if (millis() - wifiMillis > WIFICONNECTTIMEOUT) {

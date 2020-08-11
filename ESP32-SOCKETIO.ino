@@ -1,12 +1,7 @@
-enum connectionStatus {
-  pairing,
-  paired,
-  detached
-};
-
 int connection = 0;
 
 #define VERSION "v0.2"
+
 #define ESP32set
 
 #define WIFICONNECTTIMEOUT 60000
