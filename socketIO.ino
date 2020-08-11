@@ -1,11 +1,7 @@
 
 void socketIO_Connected(const char * payload, size_t length) {
   Serial.println("Socket.IO Connected!");
-  pinMode(LEDPin, OUTPUT);
-  digitalWrite(LEDPin, 1);
-  delay(100);
-  digitalWrite(LEDPin, 0);
-  delay(100);
+  blinkOnConnect();
 }
 
 void socketIO_sendMac(const char * payload, size_t length) {
@@ -37,7 +33,6 @@ void socketIO_msg(const char * payload, size_t length) {
   Serial.println(recData);
   String testt = String(recData);
   if (testt.indexOf("hello") > -1) {
-    //LEDState = !LEDState;
     blinkDevice();
   }
 
@@ -47,7 +42,7 @@ void socketIO_sendButtonPress() {
   Serial.println("button send");
   const size_t capacity = JSON_OBJECT_SIZE(2) + 50;
   DynamicJsonDocument doc(capacity);
-  doc["macAddress"] = remote_macAddress;
+  doc["macAddress"] = getRemoteMacAddress(1);
   doc["data"] = "hello";
   String sender;
   serializeJson(doc, sender);
@@ -61,4 +56,5 @@ void setupSocketIOEvents() {
   socketIO.on("send mac", socketIO_sendMac);
   socketIO.on("msg", socketIO_msg);
   socketIO.begin(host, port, path);
+  Serial.println("attached socketio listeners");
 }

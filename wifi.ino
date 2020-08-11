@@ -47,10 +47,32 @@ void createSCADSAP() {
   Serial.println(myIP);
 }
 
-void connectToWifi() {
+void connectToWifi(String credentials) {
+
+  String _wifiCredentials = credentials;
+  const size_t capacity = 2 * JSON_ARRAY_SIZE(6) + JSON_OBJECT_SIZE(2) + 150;
+  DynamicJsonDocument doc(capacity);
+  deserializeJson(doc, _wifiCredentials);
+  JsonArray ssid = doc["ssid"];
+  JsonArray pass = doc["password"];
+  if (ssid.size() > 0) {
+    for (int i = 0; i < ssid.size(); i++) {
+      wifiMulti.addAP(ssid[i], pass[i]);
+    }
+  } else {
+    Serial.println("issue with wifi credentials, creating access point");
+  }
+
   Serial.println("Connecting to Router");
-  wifiMulti.addAP(ROUTER_SSID, ROUTER_PASS);
+
+  long wifiMillis = millis();
   while ((wifiMulti.run() != WL_CONNECTED)) {
+    if (millis() - wifiMillis > WIFICONNECTTIMEOUT) {
+      Serial.println("Wifi connect failed, Please try your details again in the captive portal");
+      preferences.begin("scads", false);
+      preferences.putString("wifi", "");
+      preferences.end();
+    }
     delay(100);
     Serial.print(".");
   }
@@ -58,26 +80,4 @@ void connectToWifi() {
   Serial.println("WiFi connected");
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
-
-}
-
-void checkForUpdate() {
-  WiFiClient client;
-  httpUpdate.setLedPin(LEDPin, LOW);
-  String updateHost = "http://" + (String)host + "/update";
-  t_httpUpdate_return ret = httpUpdate.update(client, updateHost, VERSION);
-
-  switch (ret) {
-    case HTTP_UPDATE_FAILED:
-      Serial.println("HTTP_UPDATE_FAILED Error");
-      break;
-
-    case HTTP_UPDATE_NO_UPDATES:
-      Serial.println("HTTP_UPDATE_NO_UPDATES");
-      break;
-
-    case HTTP_UPDATE_OK:
-      Serial.println("HTTP_UPDATE_OK");
-      break;
-  }
 }
