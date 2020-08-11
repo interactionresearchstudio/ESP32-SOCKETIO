@@ -68,6 +68,7 @@ void connectToWifi(String credentials) {
   long wifiMillis = millis();
   while ((wifiMulti.run() != WL_CONNECTED)) {
     if (millis() - wifiMillis > WIFICONNECTTIMEOUT) {
+      Serial.println("Wifi connect failed, Please try your details again in the captive portal");
       preferences.begin("scads", false);
       preferences.putString("wifi", "");
       preferences.end();
