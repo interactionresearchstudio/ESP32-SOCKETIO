@@ -6,10 +6,8 @@ enum connectionStatus {
 
 connectionStatus connection = detached;
 
-//#define STAGING
-
 #define VERSION "v0.2"
-#define ESP32
+#define ESP32set
 
 #define WIFICONNECTTIMEOUT 60000
 
