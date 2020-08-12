@@ -118,7 +118,7 @@ void setup() {
     preferences.clear();
     addToMacAddressJSON(myID);
   }
-  if (hasPairedMac == false) {
+  if (hasPairedMac == false || wifiCredentials == "") {
     Serial.println("Scanning for available SCADS");
     scanningForSCADS();
     if (isClient == false) {
@@ -140,11 +140,7 @@ void setup() {
       setupFinished = true;
       Serial.println("setup complete");
     } else {
-      Serial.println("wifi setup failed, clearing credentials for you to please try again");
-      preferences.begin("scads", false);
-      preferences.clear();
-      preferences.end();
-      ESP.restart();
+      Serial.println("wifi no credentials");
     }
   }
 }
@@ -196,6 +192,7 @@ void blinkOnConnect() {
     digitalWrite(onBoardLed, 0);
     delay(400);
   }
+  delay(600);
 }
 
 void buttonHandler() {

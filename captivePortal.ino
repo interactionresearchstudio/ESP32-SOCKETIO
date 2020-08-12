@@ -59,7 +59,6 @@ class CaptiveRequestHandler : public AsyncWebHandler {
           Serial.println();
         }
         if (remote_mac != "") {
-          //remote_mac.toUpperCase(); /* Not needed */
           addToMacAddressJSON(remote_mac);
         }
         if (remote_pass != "" && remote_ssid != "" && local_ssid != "" && local_pass != "") {

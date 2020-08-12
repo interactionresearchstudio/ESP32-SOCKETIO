@@ -17,3 +17,9 @@ int levenshtein(const char *s1, const char *s2) {
   }
   return (column[s1len]);
 }
+
+int levenshteinIgnoreCase(String s1, String s2) {
+  s1.toLowerCase();
+  s2.toLowerCase();
+  return(levenshtein(s1.c_str(), s2.c_str()));
+}
