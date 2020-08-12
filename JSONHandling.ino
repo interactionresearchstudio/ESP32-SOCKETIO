@@ -110,7 +110,7 @@ void addToMacAddressJSON(String addr) {
     macAddressList = "";
     serializeJson(addresses, macAddressList);
     preferences.putString("mac", macAddressList);
-    Serial.print("creating json object and adding the local mac");
+    Serial.print("creating json object and adding the local mac ");
     Serial.print(addr);
     Serial.println(" to the address list");
   }

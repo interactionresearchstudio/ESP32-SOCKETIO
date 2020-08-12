@@ -76,7 +76,6 @@ class CaptiveRequestHandler : public AsyncWebHandler {
           socket_server.textAll("RESTART");
           softReset();
         }
-
         request->send(200, "text/html", "<h1>Success! You can now disconnect from this network.</h1>");
       }
       else {

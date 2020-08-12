@@ -72,6 +72,7 @@ void connectToWifi(String credentials) {
       preferences.begin("scads", false);
       preferences.putString("wifi", "");
       preferences.end();
+      ESP.restart();
     }
     delay(100);
     Serial.print(".");
