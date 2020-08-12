@@ -81,3 +81,23 @@ void connectToWifi(String credentials) {
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
 }
+
+String checkSsidForSpelling(String incomingSSID) {
+  int n = WiFi.scanNetworks();
+  Serial.println("scan done");
+  if (n == 0) {
+    Serial.println("no networks found");
+  } else {
+    Serial.print(n);
+    Serial.println(" networks found");
+    for (int i = 0; i < n; ++i) {
+      Serial.println(WiFi.SSID(i));
+      if (levenshtein(incomingSSID, WiFi.SSID(i)) < 1) {
+        Serial.println("found a match");
+        return WiFi.SSID(i);
+      }
+    }
+    Serial.println("no matching wifi in the area");
+  }
+  return incomingSSID;
+}

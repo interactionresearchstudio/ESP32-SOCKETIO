@@ -115,7 +115,7 @@ void setup() {
     hasPairedMac = false;
     Serial.println("setting up JSON database for mac addresses");
     preferences.clear();
-    if (checkID(myID))Serial.println("valid ID");
+    if (checkID(generateID()))Serial.println("valid ID");
     else Serial.println("bad ID");
     //implement invalid ID fallback
     addToMacAddressJSON(myID);
