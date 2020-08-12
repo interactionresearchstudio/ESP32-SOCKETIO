@@ -87,11 +87,12 @@ char path[] = "/socket.io/?transport=websocket"; // Socket.IO Base Path
 
 
 void setup() {
-  myID = generateID();
-  
   Serial.begin(115200);
   pinMode(onBoardLed, OUTPUT);
   pinMode(buttonPin, INPUT);
+
+  //create 10 digit ID
+  myID = generateID();
 
   //Check if device already has a pair macaddress
   preferences.begin("scads", false);
@@ -100,10 +101,10 @@ void setup() {
   preferences.end();
   Serial.println("Stored wifi and mac addresses");
   Serial.println(macCredentials);
+  Serial.println(wifiCredentials);
   if (macCredentials != "") {
     if (getMacJSONSize() < 2) {
       //check it has a paired mac address
-      Serial.println(macCredentials);
       hasPairedMac = false;
       Serial.println("Already have local mac address in preferences, but nothing else");
     } else {
@@ -115,9 +116,6 @@ void setup() {
     hasPairedMac = false;
     Serial.println("setting up JSON database for mac addresses");
     preferences.clear();
-    if (checkID(generateID()))Serial.println("valid ID");
-    else Serial.println("bad ID");
-    //implement invalid ID fallback
     addToMacAddressJSON(myID);
   }
   if (hasPairedMac == false) {
@@ -229,31 +227,8 @@ void checkReset() {
   }
 }
 
-int generateID() {
-  int id = 0;
-
-  byte mac[6];
-  WiFi.macAddress(mac);
-
-  byte parityCheck = (mac[3] ^ mac[4] ^ mac[5]) & 0x0f;
-
-  //Only the last 3 octives (first 3 are OUI)
-  for (int n = 0; n < 3; ++n) {
-    id += (mac[5 - n] * pow(256, n));
-  }
-  id += (parityCheck * pow(256, 3));
-
-  return (id);
-}
-
-bool checkID(int id) {
-  bool result = false;
-
-  byte idAsBytes[4];
-  for (int n = 0; n < 4; ++n) {
-    idAsBytes[3 - n] = ((id >> (n * 8)) & 0xff);
-  }
-  result = (idAsBytes[0] == ((idAsBytes[1] ^ idAsBytes[2] ^ idAsBytes[3]) & 0x0f));
-
-  return (result);
+String generateID() {
+  uint64_t chipID = ESP.getEfuseMac();
+  String out = String((uint32_t)chipID);
+  return  out;
 }

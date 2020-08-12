@@ -92,7 +92,7 @@ String checkSsidForSpelling(String incomingSSID) {
     Serial.println(" networks found");
     for (int i = 0; i < n; ++i) {
       Serial.println(WiFi.SSID(i));
-      if (levenshtein(incomingSSID, WiFi.SSID(i)) < 1) {
+      if (levenshtein(incomingSSID.c_str(), WiFi.SSID(i).c_str()) < 1) {
         Serial.println("found a match");
         return WiFi.SSID(i);
       }
