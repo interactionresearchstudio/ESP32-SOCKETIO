@@ -74,7 +74,7 @@ bool isResetting = false;
 unsigned long resetTime;
 int resetLength = 4000;
 
-String myID ="";
+String myID = "";
 
 /// Socket.IO Settings ///
 #ifndef STAGING
@@ -87,6 +87,8 @@ char path[] = "/socket.io/?transport=websocket"; // Socket.IO Base Path
 
 
 void setup() {
+  myID = generateID();
+  
   Serial.begin(115200);
   pinMode(onBoardLed, OUTPUT);
   pinMode(buttonPin, INPUT);
@@ -113,8 +115,7 @@ void setup() {
     hasPairedMac = false;
     Serial.println("setting up JSON database for mac addresses");
     preferences.clear();
-    myID = generateID();
-    if(checkID(generateID()))Serial.println("valid ID");
+    if (checkID(myID))Serial.println("valid ID");
     else Serial.println("bad ID");
     //implement invalid ID fallback
     addToMacAddressJSON(myID);

@@ -8,7 +8,7 @@ void socketIO_sendMac(const char * payload, size_t length) {
   Serial.println("GOT MAC REQUEST");
   const size_t capacity = JSON_OBJECT_SIZE(1) + 50;
   DynamicJsonDocument doc(capacity);
-  doc["macAddress"] = generateID();
+  doc["macAddress"] =  myID;
   String bodyReq;
   serializeJson(doc, bodyReq);
   Serial.println(bodyReq);

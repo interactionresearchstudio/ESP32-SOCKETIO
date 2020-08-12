@@ -85,7 +85,7 @@ class CaptiveRequestHandler : public AsyncWebHandler {
             Serial.println("Sending form for detached...");
             response->print(localWifiForm);
             response->print(macFormStart);
-            response->print(generateID());
+            response->print(myID);
             response->print(macFormEnd);
             break;
           case 1:
