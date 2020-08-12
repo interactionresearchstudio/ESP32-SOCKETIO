@@ -59,6 +59,7 @@ class CaptiveRequestHandler : public AsyncWebHandler {
           Serial.println();
         }
         if (remote_mac != "") {
+          //remote_mac.toUpperCase(); /* Not needed */
           addToMacAddressJSON(remote_mac);
         }
         if (remote_pass != "" && remote_ssid != "" && local_ssid != "" && local_pass != "") {
@@ -84,7 +85,7 @@ class CaptiveRequestHandler : public AsyncWebHandler {
             Serial.println("Sending form for detached...");
             response->print(localWifiForm);
             response->print(macFormStart);
-            response->print(WiFi.macAddress());
+            response->print(generateID());
             response->print(macFormEnd);
             break;
           case 1:

@@ -69,6 +69,13 @@ int buttonPin = 0;
 bool buttonDebounce;
 unsigned long buttonPressTime;
 
+//reset timers
+bool isResetting = false;
+unsigned long resetTime;
+int resetLength = 4000;
+
+String myID ="";
+
 /// Socket.IO Settings ///
 #ifndef STAGING
 char host[] = "irs-socket-server.herokuapp.com"; // Socket.IO Server Address
@@ -106,7 +113,11 @@ void setup() {
     hasPairedMac = false;
     Serial.println("setting up JSON database for mac addresses");
     preferences.clear();
-    addToMacAddressJSON(WiFi.macAddress());
+    myID = generateID();
+    if(checkID(generateID()))Serial.println("valid ID");
+    else Serial.println("bad ID");
+    //implement invalid ID fallback
+    addToMacAddressJSON(myID);
   }
   if (hasPairedMac == false) {
     Serial.println("Scanning for available SCADS");
@@ -201,10 +212,6 @@ void buttonHandler() {
   }
 }
 
-bool isResetting = false;
-unsigned long resetTime;
-int resetLength = 4000;
-
 void softReset() {
   if (isResetting == false) {
     isResetting = true;
@@ -219,4 +226,33 @@ void checkReset() {
       ESP.restart();
     }
   }
+}
+
+int generateID() {
+  int id = 0;
+
+  byte mac[6];
+  WiFi.macAddress(mac);
+
+  byte parityCheck = (mac[3] ^ mac[4] ^ mac[5]) & 0x0f;
+
+  //Only the last 3 octives (first 3 are OUI)
+  for (int n = 0; n < 3; ++n) {
+    id += (mac[5 - n] * pow(256, n));
+  }
+  id += (parityCheck * pow(256, 3));
+
+  return (id);
+}
+
+bool checkID(int id) {
+  bool result = false;
+
+  byte idAsBytes[4];
+  for (int n = 0; n < 4; ++n) {
+    idAsBytes[3 - n] = ((id >> (n * 8)) & 0xff);
+  }
+  result = (idAsBytes[0] == ((idAsBytes[1] ^ idAsBytes[2] ^ idAsBytes[3]) & 0x0f));
+
+  return (result);
 }
