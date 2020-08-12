@@ -30,7 +30,7 @@ SocketIoClient socketIO;
 
 //Access Point credentials
 String scads_ssid = "";
-String scads_pass = "blinksandbleeps";
+String scads_pass = "blinkblink";
 
 const byte DNS_PORT = 53;
 DNSServer dnsServer;
@@ -69,6 +69,13 @@ int buttonPin = 0;
 bool buttonDebounce;
 unsigned long buttonPressTime;
 
+//reset timers
+bool isResetting = false;
+unsigned long resetTime;
+int resetLength = 4000;
+
+String myID = "";
+
 /// Socket.IO Settings ///
 #ifndef STAGING
 char host[] = "irs-socket-server.herokuapp.com"; // Socket.IO Server Address
@@ -84,6 +91,9 @@ void setup() {
   pinMode(onBoardLed, OUTPUT);
   pinMode(buttonPin, INPUT);
 
+  //create 10 digit ID
+  myID = generateID();
+
   //Check if device already has a pair macaddress
   preferences.begin("scads", false);
   wifiCredentials = preferences.getString("wifi", "");
@@ -91,10 +101,10 @@ void setup() {
   preferences.end();
   Serial.println("Stored wifi and mac addresses");
   Serial.println(macCredentials);
+  Serial.println(wifiCredentials);
   if (macCredentials != "") {
     if (getMacJSONSize() < 2) {
       //check it has a paired mac address
-      Serial.println(macCredentials);
       hasPairedMac = false;
       Serial.println("Already have local mac address in preferences, but nothing else");
     } else {
@@ -106,9 +116,9 @@ void setup() {
     hasPairedMac = false;
     Serial.println("setting up JSON database for mac addresses");
     preferences.clear();
-    addToMacAddressJSON(WiFi.macAddress());
+    addToMacAddressJSON(myID);
   }
-  if (hasPairedMac == false) {
+  if (hasPairedMac == false || wifiCredentials == "") {
     Serial.println("Scanning for available SCADS");
     scanningForSCADS();
     if (isClient == false) {
@@ -130,11 +140,7 @@ void setup() {
       setupFinished = true;
       Serial.println("setup complete");
     } else {
-      Serial.println("wifi setup failed, clearing credentials for you to please try again");
-      preferences.begin("scads", false);
-      preferences.clear();
-      preferences.end();
-      ESP.restart();
+      Serial.println("wifi no credentials");
     }
   }
 }
@@ -186,6 +192,7 @@ void blinkOnConnect() {
     digitalWrite(onBoardLed, 0);
     delay(400);
   }
+  delay(600);
 }
 
 void buttonHandler() {
@@ -201,10 +208,6 @@ void buttonHandler() {
   }
 }
 
-bool isResetting = false;
-unsigned long resetTime;
-int resetLength = 4000;
-
 void softReset() {
   if (isResetting == false) {
     isResetting = true;
@@ -219,4 +222,10 @@ void checkReset() {
       ESP.restart();
     }
   }
+}
+
+String generateID() {
+  uint64_t chipID = ESP.getEfuseMac();
+  String out = String((uint32_t)chipID);
+  return  out;
 }

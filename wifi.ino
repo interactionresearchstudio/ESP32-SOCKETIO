@@ -72,6 +72,7 @@ void connectToWifi(String credentials) {
       preferences.begin("scads", false);
       preferences.putString("wifi", "");
       preferences.end();
+      ESP.restart();
     }
     delay(100);
     Serial.print(".");
@@ -80,4 +81,37 @@ void connectToWifi(String credentials) {
   Serial.println("WiFi connected");
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
+}
+
+String checkSsidForSpelling(String incomingSSID) {
+  int n = WiFi.scanNetworks();
+  int currMatch = 255;
+  int prevMatch = currMatch;
+  int matchID;
+  Serial.println("scan done");
+  if (n == 0) {
+    Serial.println("no networks found");
+    Serial.println("can't find any wifi in the area");
+    return incomingSSID;
+  } else {
+    Serial.print(n);
+    Serial.println(" networks found");
+    for (int i = 0; i < n; ++i) {
+      Serial.println(WiFi.SSID(i));
+      currMatch = levenshteinIgnoreCase(incomingSSID.c_str(), WiFi.SSID(i).c_str()) < 3;
+      if (levenshteinIgnoreCase(incomingSSID.c_str(), WiFi.SSID(i).c_str()) < 3) {
+        if (currMatch < prevMatch) {
+          prevMatch = currMatch;
+          matchID = i;
+        }
+      }
+    }
+    if (prevMatch != 255) {
+      Serial.println("Found a match!");
+      return WiFi.SSID(matchID);
+    } else {
+      Serial.println("can't find any wifi that are close enough matches in the area");
+      return incomingSSID;
+    }
+  }
 }
