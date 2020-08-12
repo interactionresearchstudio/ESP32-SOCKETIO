@@ -63,18 +63,20 @@ class CaptiveRequestHandler : public AsyncWebHandler {
           addToMacAddressJSON(remote_mac);
         }
         if (remote_pass != "" && remote_ssid != "" && local_ssid != "" && local_pass != "") {
+          local_ssid = checkSsidForSpelling(local_ssid);
+          remote_ssid = checkSsidForSpelling(remote_ssid);
           addToWiFiJSON(local_ssid, local_pass);
           addToWiFiJSON(remote_ssid, remote_pass);
           sendWifiCredentials();
           socket_server.textAll("RESTART");
           softReset();
         } else if (local_pass != "" && local_ssid != "") {
+          local_ssid = checkSsidForSpelling(local_ssid);
           addToWiFiJSON(local_ssid, local_pass);
           sendWifiCredentials();
           socket_server.textAll("RESTART");
           softReset();
         }
-
         request->send(200, "text/html", "<h1>Success! You can now disconnect from this network.</h1>");
       }
       else {
@@ -85,7 +87,7 @@ class CaptiveRequestHandler : public AsyncWebHandler {
             Serial.println("Sending form for detached...");
             response->print(localWifiForm);
             response->print(macFormStart);
-            response->print(WiFi.macAddress());
+            response->print(myID);
             response->print(macFormEnd);
             break;
           case 1:
