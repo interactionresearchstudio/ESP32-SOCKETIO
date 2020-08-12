@@ -30,7 +30,7 @@ SocketIoClient socketIO;
 
 //Access Point credentials
 String scads_ssid = "";
-String scads_pass = "blinksandbleeps";
+String scads_pass = "blinkblink";
 
 const byte DNS_PORT = 53;
 DNSServer dnsServer;
