@@ -57,7 +57,7 @@ void connectToWifi(String credentials) {
   JsonArray pass = doc["password"];
   if (ssid.size() > 0) {
     for (int i = 0; i < ssid.size(); i++) {
-      wifiMulti.addAP(ssid[i], pass[i]);
+      wifiMulti.addAP(checkSsidForSpelling(ssid[i]), pass[i]);
     }
   } else {
     Serial.println("issue with wifi credentials, creating access point");
