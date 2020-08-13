@@ -1,3 +1,15 @@
+#define EXTERNAL_BUTTON 23
+#define EXTERNAL_LED1 21
+#define EXTERNAL_LED2 19
+#define EXTERNAL_LED3 18
+
+bool led2Toggle = false;
+
+#define LED3TIMEON 30000
+long led3PrevTime;
+bool led3IsPressed = true;
+
+
 int connection = 0;
 
 #define VERSION "v0.2"
@@ -88,8 +100,7 @@ char path[] = "/socket.io/?transport=websocket"; // Socket.IO Base Path
 
 void setup() {
   Serial.begin(115200);
-  pinMode(onBoardLed, OUTPUT);
-  pinMode(buttonPin, INPUT);
+  setupPins();
 
   //create 10 digit ID
   myID = generateID();
@@ -162,70 +173,6 @@ void loop() {
     socketIO.loop();
     buttonHandler();
     ledHandler();
+    led3Handler();
   }
-}
-
-void blinkDevice() {
-  if (readyToBlink == false) {
-    readyToBlink = true;
-  }
-}
-
-void ledHandler() {
-  if (readyToBlink == true && isBlinking == false) {
-    isBlinking = true;
-    blinkTime = millis();
-    digitalWrite(onBoardLed, 1);
-  }
-  if (millis() - blinkTime > blinkDuration && isBlinking == true) {
-    digitalWrite(onBoardLed, 0);
-    isBlinking = false;
-    readyToBlink = false;
-  }
-}
-
-void blinkOnConnect() {
-  byte NUM_BLINKS = 3;
-  for (byte i = 0; i < NUM_BLINKS; i++) {
-    digitalWrite(onBoardLed, 1);
-    delay(100);
-    digitalWrite(onBoardLed, 0);
-    delay(400);
-  }
-  delay(600);
-}
-
-void buttonHandler() {
-  const bool buttonState = digitalRead(buttonPin);
-  if (!buttonState && buttonDebounce == false) {
-    Serial.println("button pressed");
-    buttonPressTime = millis();
-    buttonDebounce = true;
-    socketIO_sendButtonPress();
-  }
-  if (buttonState && buttonDebounce == true && millis() - buttonPressTime > 500) {
-    buttonDebounce = false;
-  }
-}
-
-void softReset() {
-  if (isResetting == false) {
-    isResetting = true;
-    resetTime = millis();
-  }
-
-}
-
-void checkReset() {
-  if (isResetting) {
-    if (millis() - resetTime > resetLength) {
-      ESP.restart();
-    }
-  }
-}
-
-String generateID() {
-  uint64_t chipID = ESP.getEfuseMac();
-  String out = String((uint32_t)chipID);
-  return  out;
 }

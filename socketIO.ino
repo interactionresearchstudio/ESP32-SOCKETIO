@@ -34,6 +34,8 @@ void socketIO_msg(const char * payload, size_t length) {
   String testt = String(recData);
   if (testt.indexOf("hello") > -1) {
     blinkDevice();
+    Led2Toggle();
+    led3LongOn();
   }
 
 }
