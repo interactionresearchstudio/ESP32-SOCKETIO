@@ -6,6 +6,9 @@ void setupPins() {
   pinMode(EXTERNAL_LED1, OUTPUT);
   pinMode(EXTERNAL_LED2, OUTPUT);
   pinMode(EXTERNAL_LED3, OUTPUT);
+  digitalWrite(EXTERNAL_LED1, 1);
+  digitalWrite(EXTERNAL_LED2, 1);
+  digitalWrite(EXTERNAL_LED3, 1);
 }
 
 //external led functions
