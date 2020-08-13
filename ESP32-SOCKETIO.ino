@@ -3,11 +3,11 @@
 #define EXTERNAL_LED2 19
 #define EXTERNAL_LED3 18
 
-bool led2Toggle = false;
+bool led2Toggle = true;
 
 #define LED3TIMEON 30000
 long led3PrevTime;
-bool led3IsPressed = true;
+bool led3IsPressed = false;
 
 
 int connection = 0;
