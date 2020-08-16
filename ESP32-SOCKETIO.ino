@@ -3,19 +3,32 @@
 #define EXTERNAL_LED2 19
 #define EXTERNAL_LED3 18
 
+#define LED_BUILTIN 2
+#define LED_BUILTIN_ON HIGH
+
 bool led2Toggle = true;
 
 #define LED3TIMEON 30000
 long led3PrevTime;
 bool led3IsPressed = false;
 
+enum PAIRED_STATUS {
+  unpaired,
+  pairing,
+  paired
+};
+int currentPairedStatus = unpaired;
 
-int connection = 0;
+enum SETUP_STATUS {
+  setup_pending,
+  setup_client,
+  setup_server,
+  setup_finished
+};
+int currentSetupStatus = setup_pending;
 
-#define VERSION "v0.2"
-
+#define VERSION "v0.2dev"
 #define ESP32set
-
 #define WIFICONNECTTIMEOUT 60000
 
 #include <AsyncTCP.h>
@@ -29,7 +42,6 @@ SocketIoClient socketIO;
 //Local Websockets
 #include <WebSocketsClient.h>
 
-
 #include <Preferences.h>
 #include <WiFi.h>
 #include <WiFiMulti.h>
@@ -38,7 +50,6 @@ SocketIoClient socketIO;
 #include <ArduinoJson.h>
 #include <HTTPClient.h>
 #include <HTTPUpdate.h>
-
 
 //Access Point credentials
 String scads_ssid = "";
@@ -58,19 +69,12 @@ AsyncWebSocket socket_server("/ws");
 WebSocketsClient socket_client;
 byte webSocketClientID;
 
-
 WiFiMulti wifiMulti;
 
-//state handling variables
-bool isClient = false;
 String wifiCredentials = "";
 String macCredentials = "";
-bool hasPairedMac = false;
-bool setupFinished = false;
-
 
 /// Led Settings ///
-int onBoardLed = 2;
 bool isBlinking = false;
 bool readyToBlink = false;
 unsigned long blinkTime;
@@ -90,13 +94,12 @@ String myID = "";
 
 /// Socket.IO Settings ///
 #ifndef STAGING
-char host[] = "irs-socket-server.herokuapp.com"; // Socket.IO Server Address
+  char host[] = "irs-socket-server.herokuapp.com"; // Socket.IO Server Address
 #else
-char host[] = "irs-socket-server-staging.herokuapp.com"; // Socket.IO Staging Server Address
+  char host[] = "irs-socket-server-staging.herokuapp.com"; // Socket.IO Staging Server Address
 #endif
 int port = 80; // Socket.IO Port Address
 char path[] = "/socket.io/?transport=websocket"; // Socket.IO Base Path
-
 
 void setup() {
   Serial.begin(115200);
@@ -105,74 +108,86 @@ void setup() {
   //create 10 digit ID
   myID = generateID();
 
-  //Check if device already has a pair macaddress
   preferences.begin("scads", false);
-  wifiCredentials = preferences.getString("wifi", "");
-  macCredentials = preferences.getString("mac", "");
+    wifiCredentials = preferences.getString("wifi", "");
+    macCredentials = preferences.getString("mac", "");
   preferences.end();
+  
   Serial.println("Stored wifi and mac addresses");
   Serial.println(macCredentials);
   Serial.println(wifiCredentials);
-  if (macCredentials != "") {
-    if (getMacJSONSize() < 2) {
-      //check it has a paired mac address
-      hasPairedMac = false;
-      Serial.println("Already have local mac address in preferences, but nothing else");
-    } else {
-      hasPairedMac = true;
-      connection = 2;
-      Serial.println("Already has paired mac address");
-    }
-  } else {
-    hasPairedMac = false;
-    Serial.println("setting up JSON database for mac addresses");
-    preferences.clear();
-    addToMacAddressJSON(myID);
-  }
-  if (hasPairedMac == false || wifiCredentials == "") {
+
+  setPairedStatus();
+  
+  if (currentPairedStatus != paired || wifiCredentials == "") {
     Serial.println("Scanning for available SCADS");
-    scanningForSCADS();
-    if (isClient == false) {
+    boolean foundLocalSCADS = scanAndConnectToLocalSCADS();
+    if (!foundLocalSCADS) {
       //become server
+      currentSetupStatus = setup_server;
       createSCADSAP();
       setupCaptivePortal();
       setupLocalServer();
-    } else {
+    }
+    else {
       //become client
+      currentSetupStatus = setup_client;
       setupSocketClientEvents();
     }
-  } else {
+  }
+  else {
     Serial.print("List of Mac addresses:");
     Serial.println(macCredentials);
     //connect to router to talk to server
     if (wifiCredentials != "") {
       connectToWifi(wifiCredentials);
       setupSocketIOEvents();
-      setupFinished = true;
+      currentSetupStatus = setup_finished;
       Serial.println("setup complete");
-    } else {
+    }
+    else {
       Serial.println("wifi no credentials");
     }
   }
 }
 
-void loop() {
+void setPairedStatus() {
+  int numberOfMacAddresses = getNumberOfMacAddresses();
+  if(numberOfMacAddresses == 0) {
+    currentPairedStatus = unpaired;
+    Serial.println("setting up JSON database for mac addresses");
+    preferences.clear();
+    addToMacAddressJSON(myID);
+  }
+  else if(numberOfMacAddresses < 2) {
+    //check it has a paired mac address
+    currentPairedStatus = unpaired;
+    Serial.println("Already have local mac address in preferences, but nothing else");
+  }
+  else {
+    currentPairedStatus = paired;
+    Serial.println("Already has one or more paired mac address");
+  }
+}
 
-  if (isClient == false) {
-    //Local Server Mode
-    socket_server.cleanupClients();
-    dnsServer.processNextRequest();
-    checkReset();
+void loop() {
+  switch(currentSetupStatus) {
+    case setup_pending:
+      break;
+    case setup_client:
+      socket_client.loop();
+      break;
+    case setup_server:
+      socket_server.cleanupClients();
+      dnsServer.processNextRequest();
+      break;
+    case setup_finished:
+      socketIO.loop();
+      buttonHandler();
+      ledHandler();
+      led3Handler();
+      break;
   }
-  if (isClient == true && setupFinished == false) {
-    //Local Client Mode
-    socket_client.loop();
-    checkReset();
-  } else if (setupFinished == true) {
-    //Connected Mode
-    socketIO.loop();
-    buttonHandler();
-    ledHandler();
-    led3Handler();
-  }
+
+  checkReset();
 }

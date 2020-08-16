@@ -1,4 +1,6 @@
-void scanningForSCADS() {
+boolean scanAndConnectToLocalSCADS() {
+  boolean foundLocalSCADS = false;
+  
   // WiFi.scanNetworks will return the number of networks found
   Serial.println("scan start");
   int n = WiFi.scanNetworks();
@@ -21,7 +23,7 @@ void scanningForSCADS() {
       scads_ssid = WiFi.SSID(i);
       if (scads_ssid.indexOf("SCADS-") > -1) {
         Serial.println("Found SCAD");
-        isClient = true;
+        foundLocalSCADS = true;
         wifiMulti.addAP(scads_ssid.c_str(), scads_pass.c_str());
         while ((wifiMulti.run() != WL_CONNECTED)) {
           delay(500);
@@ -34,6 +36,8 @@ void scanningForSCADS() {
       }
     }
   }
+
+  return(foundLocalSCADS);
 }
 
 void createSCADSAP() {

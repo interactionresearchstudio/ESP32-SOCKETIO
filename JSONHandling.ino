@@ -15,7 +15,7 @@ void decodeData(const char* data) {
     if (MAC != "") {
       //save to preferences
       addToMacAddressJSON(MAC);
-      if (isClient == false) {
+      if (currentSetupStatus != setup_client) {
         sendMacJSON();
       }
     } else {
@@ -172,14 +172,20 @@ String getRemoteMacAddress(int clientID) {
   return (macs[clientID]);
 }
 
-int getMacJSONSize() {
+int getNumberOfMacAddresses() {
+  int numberOfMacAddresses = 0;
+  
   //Returns the number of mac address in JSON array
   preferences.begin("scads", false);
-  String requestBody = preferences.getString("mac", "");
+    String macCredentials = preferences.getString("mac", "");
   preferences.end();
-  const size_t capacity = JSON_ARRAY_SIZE(6) + JSON_OBJECT_SIZE(1) + 10;
-  DynamicJsonDocument addresses(capacity);
-  deserializeJson(addresses, requestBody);
-  JsonArray mac = addresses["mac"];
-  return mac.size();
+
+  if (macCredentials != "") {
+    const size_t capacity = JSON_ARRAY_SIZE(6) + JSON_OBJECT_SIZE(1) + 10;
+    DynamicJsonDocument addresses(capacity);
+    deserializeJson(addresses, macCredentials);
+    numberOfMacAddresses = addresses["mac"].size();
+  }
+
+  return(numberOfMacAddresses);
 }

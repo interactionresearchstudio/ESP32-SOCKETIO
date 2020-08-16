@@ -1,14 +1,14 @@
 void setupPins() {
-  pinMode(onBoardLed, OUTPUT);
+  pinMode(LED_BUILTIN, OUTPUT);
   pinMode(buttonPin, INPUT);
 
   pinMode(EXTERNAL_BUTTON, INPUT_PULLUP);
   pinMode(EXTERNAL_LED1, OUTPUT);
   pinMode(EXTERNAL_LED2, OUTPUT);
   pinMode(EXTERNAL_LED3, OUTPUT);
-  digitalWrite(EXTERNAL_LED1, 1);
-  digitalWrite(EXTERNAL_LED2, 1);
-  digitalWrite(EXTERNAL_LED3, 1);
+  digitalWrite(EXTERNAL_LED1, HIGH);
+  digitalWrite(EXTERNAL_LED2, HIGH);
+  digitalWrite(EXTERNAL_LED3, HIGH);
 }
 
 //external led functions
@@ -22,14 +22,14 @@ void led3LongOn() {
   if (led3IsPressed == false) {
     led3IsPressed = true;
     led3PrevTime = millis();
-    digitalWrite(EXTERNAL_LED3, 0);
+    digitalWrite(EXTERNAL_LED3, LOW);
   }
 }
 
 void led3Handler() {
   if (led3IsPressed == true && millis() - led3PrevTime > LED3TIMEON) {
     led3IsPressed = false;
-    digitalWrite(EXTERNAL_LED3, 1);
+    digitalWrite(EXTERNAL_LED3, HIGH);
   }
 }
 
@@ -46,11 +46,11 @@ void ledHandler() {
   if (readyToBlink == true && isBlinking == false) {
     isBlinking = true;
     blinkTime = millis();
-    digitalWrite(onBoardLed, 1);
+    digitalWrite(LED_BUILTIN, 1);
     digitalWrite(EXTERNAL_LED1, 0);
   }
   if (millis() - blinkTime > blinkDuration && isBlinking == true) {
-    digitalWrite(onBoardLed, 0);
+    digitalWrite(LED_BUILTIN, 0);
     digitalWrite(EXTERNAL_LED1, 1);
     isBlinking = false;
     readyToBlink = false;
@@ -60,9 +60,9 @@ void ledHandler() {
 void blinkOnConnect() {
   byte NUM_BLINKS = 3;
   for (byte i = 0; i < NUM_BLINKS; i++) {
-    digitalWrite(onBoardLed, 1);
+    digitalWrite(LED_BUILTIN, 1);
     delay(100);
-    digitalWrite(onBoardLed, 0);
+    digitalWrite(LED_BUILTIN, 0);
     delay(400);
   }
   delay(600);

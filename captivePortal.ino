@@ -82,20 +82,20 @@ class CaptiveRequestHandler : public AsyncWebHandler {
       else {
         AsyncResponseStream *response = request->beginResponseStream("text/html");
         response->print(htmlStart);
-        switch (getDeviceStatus()) {
-          case 0:
-            Serial.println("Sending form for detached...");
+        switch (currentPairedStatus) {
+          case unpaired:
+            Serial.println("Sending form for unpaired...");
             response->print(localWifiForm);
             response->print(macFormStart);
             response->print(myID);
             response->print(macFormEnd);
             break;
-          case 1:
+          case pairing:
             Serial.println("Sending form for pairing...");
             response->print(localWifiForm);
             response->print(remoteWifiForm);
             break;
-          case 2:
+          case paired:
             Serial.println("Sending form for paired...");
             response->print(localWifiForm);
             break;
@@ -105,15 +105,6 @@ class CaptiveRequestHandler : public AsyncWebHandler {
       }
     }
 };
-
-int getDeviceStatus() {
-  /*
-     0: detached
-     1: pairing
-     2: paired
-  */
-  return connection;
-}
 
 void setupCaptivePortal() {
   dnsServer.start(DNS_PORT, "*", apIP);
