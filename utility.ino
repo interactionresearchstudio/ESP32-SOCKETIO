@@ -1,8 +1,17 @@
 void setupPins() {
   pinMode(LED_BUILTIN, OUTPUT);
-  pinMode(buttonPin, INPUT);
-
+  
+  pinMode(BUTTON_BUILTIN, INPUT);
   pinMode(EXTERNAL_BUTTON, INPUT_PULLUP);
+
+  ButtonConfig* buttonConfigBuiltIn = buttonBuiltIn.getButtonConfig();
+  buttonConfigBuiltIn->setEventHandler(handleButtonEvent);
+  buttonConfigBuiltIn->setFeature(ButtonConfig::kFeatureLongPress);
+  buttonConfigBuiltIn->setLongPressDelay(longButtonPressDelay);
+
+  ButtonConfig* buttonExternalConfig = buttonExternal.getButtonConfig();
+  buttonExternalConfig->setEventHandler(handleButtonEvent);
+
   pinMode(EXTERNAL_LED1, OUTPUT);
   pinMode(EXTERNAL_LED2, OUTPUT);
   pinMode(EXTERNAL_LED3, OUTPUT);
@@ -69,35 +78,40 @@ void blinkOnConnect() {
 }
 
 // button functions
-
-void buttonHandler() {
-  bool buttonState = digitalRead(buttonPin);
-  bool buttonState2 = digitalRead(EXTERNAL_BUTTON);
-  if (!buttonState2) {
-    buttonState = false;
-  }
-
-  if (!buttonState && buttonDebounce == false) {
-    Serial.println("button pressed");
-    buttonPressTime = millis();
-    buttonDebounce = true;
-    socketIO_sendButtonPress();
-  }
-  if (buttonState && buttonDebounce == true && millis() - buttonPressTime > 500) {
-    buttonDebounce = false;
+void handleButtonEvent(AceButton* button, uint8_t eventType, uint8_t buttonState) {
+  Serial.println(button->getId());
+  
+  switch (eventType) {
+    case AceButton::kEventPressed:
+      break;
+    case AceButton::kEventReleased:
+      if(currentSetupStatus == setup_finished) socketIO_sendButtonPress();
+      break;
+    case AceButton::kEventLongPressed:
+      factoryReset();
+      break;
+    case AceButton::kEventRepeatPressed:
+      break;
   }
 }
 
-
-
 //reset functions
+void factoryReset() {
+  Serial.println("factoryReset");
+  
+  preferences.begin("scads", false);
+    preferences.clear();
+  preferences.end();
+  currentSetupStatus = setup_pending;
+
+  ESP.restart();
+}
 
 void softReset() {
   if (isResetting == false) {
     isResetting = true;
     resetTime = millis();
   }
-
 }
 
 void checkReset() {

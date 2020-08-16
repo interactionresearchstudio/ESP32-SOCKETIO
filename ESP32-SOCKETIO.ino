@@ -6,6 +6,8 @@
 #define LED_BUILTIN 2
 #define LED_BUILTIN_ON HIGH
 
+int BUTTON_BUILTIN = 0;
+
 bool led2Toggle = true;
 
 #define LED3TIMEON 30000
@@ -51,6 +53,9 @@ SocketIoClient socketIO;
 #include <HTTPClient.h>
 #include <HTTPUpdate.h>
 
+#include <AceButton.h>
+using namespace ace_button;
+
 //Access Point credentials
 String scads_ssid = "";
 String scads_pass = "blinkblink";
@@ -81,9 +86,10 @@ unsigned long blinkTime;
 int blinkDuration = 200;
 
 //Button Settings
-int buttonPin = 0;
-bool buttonDebounce;
-unsigned long buttonPressTime;
+AceButton buttonBuiltIn(BUTTON_BUILTIN);
+AceButton buttonExternal(EXTERNAL_BUTTON);
+void handleButtonEvent(AceButton*, uint8_t, uint8_t);
+int longButtonPressDelay = 5000;
 
 //reset timers
 bool isResetting = false;
@@ -140,7 +146,7 @@ void setup() {
     Serial.println(macCredentials);
     //connect to router to talk to server
     if (wifiCredentials != "") {
-      connectToWifi(wifiCredentials);
+      connectToWifi(wifiCredentials); //assumes that it will connect - should really make a portal?
       setupSocketIOEvents();
       currentSetupStatus = setup_finished;
       Serial.println("setup complete");
@@ -183,11 +189,12 @@ void loop() {
       break;
     case setup_finished:
       socketIO.loop();
-      buttonHandler();
       ledHandler();
       led3Handler();
       break;
   }
 
+  buttonBuiltIn.check();
+  buttonExternal.check();
   checkReset();
 }
