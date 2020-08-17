@@ -40,10 +40,12 @@ class CaptiveRequestHandler : public AsyncWebHandler {
       else if(SPIFFS.exists(request->url())) {
         sendFile(request, request->url());
       }
-      else {
+      else if(request->url().endsWith(".html") || request->url().endsWith("/")) {
         //renderPortal(request);
-        if (request->url().endsWith(".html")) sendFile(request, "/index.html");\
-        else request->send(404);
+        sendFile(request, "/index.html");
+      }
+      else {
+        request->send(404);
       }
     }
 
