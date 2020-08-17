@@ -27,15 +27,52 @@ class CaptiveRequestHandler : public AsyncWebHandler {
       Serial.print(request->url());
       Serial.print(" type: ");
       Serial.println(request->method());
+      
       if (request->url() == "/credentials") {
         setCredentials(request);
       }
       else if (request->url() == "/scan") {
         getScan(request);
       }
-      else {
-        renderPortal(request);
+      else if (request->url() == "/id") {
+        getID(request);
       }
+      else if(SPIFFS.exists(request->url())) {
+        sendFile(request, request->url());
+      }
+      else {
+        //renderPortal(request);
+        if (request->url().endsWith(".html")) sendFile(request, "/index.html");\
+        else request->send(404);
+      }
+    }
+
+    void sendFile(AsyncWebServerRequest *request, String path) {
+      Serial.println("handleFileRead: " + path);
+    
+      if (SPIFFS.exists(path)) {
+        request->send(SPIFFS, path, getContentType(path));
+      }
+      else{
+        request->send(404);
+      }
+    }
+
+    String getContentType(String filename) {
+      if (filename.endsWith(".htm")) return "text/html";
+      else if (filename.endsWith(".html")) return "text/html";
+      else if (filename.endsWith(".css")) return "text/css";
+      else if (filename.endsWith(".js")) return "application/javascript";
+      else if (filename.endsWith(".png")) return "image/png";
+      else if (filename.endsWith(".gif")) return "image/gif";
+      else if (filename.endsWith(".jpg")) return "image/jpeg";
+      else if (filename.endsWith(".ico")) return "image/x-icon";
+      else if (filename.endsWith(".xml")) return "text/xml";
+      else if (filename.endsWith(".pdf")) return "application/x-pdf";
+      else if (filename.endsWith(".zip")) return "application/x-zip";
+      else if (filename.endsWith(".gz")) return "application/x-gzip";
+      else if (filename.endsWith(".json")) return "application/json";
+      return "text/plain";
     }
 
     void setCredentials(AsyncWebServerRequest *request) {
@@ -97,6 +134,13 @@ class CaptiveRequestHandler : public AsyncWebHandler {
       AsyncResponseStream *response = request->beginResponseStream("application/json");
 
       response->print(getScanAsJsonString());
+      request->send(response);
+    }
+
+    void getID(AsyncWebServerRequest *request){
+      AsyncResponseStream *response = request->beginResponseStream("application/json");
+
+      response->print("{id:" + myID + "}");
       request->send(response);
     }
 

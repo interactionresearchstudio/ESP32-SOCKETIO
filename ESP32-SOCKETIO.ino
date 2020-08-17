@@ -56,6 +56,8 @@ SocketIoClient socketIO;
 #include <AceButton.h>
 using namespace ace_button;
 
+#include "SPIFFS.h"
+
 //Access Point credentials
 String scads_ssid = "";
 String scads_pass = "blinkblink";
@@ -113,6 +115,8 @@ void setup() {
 
   //create 10 digit ID
   myID = generateID();
+
+  SPIFFS.begin();
 
   preferences.begin("scads", false);
     wifiCredentials = preferences.getString("wifi", "");
