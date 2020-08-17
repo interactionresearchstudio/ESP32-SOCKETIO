@@ -1,3 +1,4 @@
+#define MAX_NETWORKS_TO_SCAN 5
 
 //JSON Data handling
 bool inList;
@@ -188,4 +189,29 @@ int getNumberOfMacAddresses() {
   }
 
   return(numberOfMacAddresses);
+}
+
+String getScanAsJsonString() {
+  String jsonString;
+
+  StaticJsonDocument<1000> jsonDoc;
+  getScanAsJson(jsonDoc);
+  serializeJson(jsonDoc[0], jsonString);
+
+  return (jsonString);
+}
+
+void getScanAsJson(JsonDocument& jsonDoc) {
+  JsonArray networks = jsonDoc.createNestedArray();
+
+  int n = WiFi.scanNetworks();
+  n = (n > MAX_NETWORKS_TO_SCAN) ? MAX_NETWORKS_TO_SCAN : n;
+
+  //Array is ordered by signal strength - strongest first
+  for (int i = 0; i < n; ++i) {
+    JsonObject network  = networks.createNestedObject();
+    network["SSID"] = WiFi.SSID(i);
+    network["BSSID"] = WiFi.BSSIDstr(i);
+    network["RSSI"] = WiFi.RSSI(i);
+  }
 }
