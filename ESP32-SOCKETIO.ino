@@ -180,6 +180,18 @@ void setPairedStatus() {
   }
 }
 
+String getCurrentPairedStatusAsString() {
+  String currentPairedStatusAsString = "";
+  
+  switch(currentPairedStatus) {
+    case unpaired:      currentPairedStatusAsString = "unpaired"; break;
+    case pairing:       currentPairedStatusAsString = "pairing";  break;
+    case paired:        currentPairedStatusAsString = "paired";   break;
+  }
+
+  return(currentPairedStatusAsString);
+}
+
 void loop() {
   switch(currentSetupStatus) {
     case setup_pending:

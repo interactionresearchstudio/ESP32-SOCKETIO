@@ -85,6 +85,7 @@ class CaptiveRequestHandler : public AsyncWebHandler {
       settingsJsonDoc["remote_ssid"] = "";
       settingsJsonDoc["remote_pass_len"] = 0; //remote_pass.length;
       settingsJsonDoc["remote_mac"] = getRemoteMacAddress(1);
+      settingsJsonDoc["local_paired_status"] = getCurrentPairedStatusAsString();
 
       String jsonString;
       serializeJson(settingsJsonDoc, jsonString);

@@ -17,23 +17,14 @@ function configure(json) {
     $('#remote-scad-code').text(json.remote_mac);
 
     $('#network').text(json.local_ssid);
-    //use the password length to display
+    //TODO: use the password length to display
 
-    // switch (currentPairedStatus) {
-    //     case unpaired:
-    //       Serial.println("Sending form for unpaired...");
-    //       response->print(macFormStart);
-    //       response->print(myID);
-    //       response->print(macFormEnd);
-    //       break;
-    //     case pairing:
-    //       Serial.println("Sending form for pairing...");
-    //       response->print(remoteWifiForm);
-    //       break;
-    //     case paired:
-    //       Serial.println("Sending form for paired...");
-    //       break;
-    //   }
+    if(json.local_paired_status == "pairing") {
+        $('#remoteWifiForm').attr('display', "block");
+    }
+    else{
+        $('#remoteWifiForm').attr('display', "none");
+    }
 
     $('#networks-dropdown').change(onNetworksDropdownChanged);
     $('#networks-dropdown').attr('disabled', true);
@@ -67,19 +58,20 @@ function populateNetworksList() {
 }
 
 function onNetworksDropdownChanged() {
-    $('#network').val($("#networks-dropdown :selected").text());
+    $('#local_ssid').val($("#networks-dropdown :selected").text());
 }
 
 function onSaveButtonClicked() {
     var data = {
-        local_ssid: $('#network').val(),
-        local_pass: $('#password').val(),
-        remote_mac: $('#remote-scad-code').val()
-        //remote_ssid
-        //remote_pass
-        //remote_mac
+        local_ssid: $('#local_ssid').val(),
+        local_pass: $('#local_pass').val(),
+        remote_mac: $('#remote-scad-code').val(),
+        remote_ssid: $('#remote_ssid').val(),
+        remote_pass: $('#remote_pass').val()
     };
     
+    console.log(data);
+
     $.ajax({
         type: "POST",
         url: "/credentials",

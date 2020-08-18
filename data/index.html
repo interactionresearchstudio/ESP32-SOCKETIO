@@ -19,8 +19,14 @@
       <p>Select your network:</p>
       <p id="networks-list"></p>
       <select id="networks-dropdown" name="networks"></select>
-      <label>Network Name:</label><input id="network">
-      <label>Password:</label><input id="password" type="password">
+      <label>Network Name:</label><input id="local_ssid">
+      <label>Password:</label><input id="local_pass" type="password">
+    </div>
+
+    <div id="remoteWifiForm">
+      <p>Optionally set remote network:</p>
+      <label>Network Name:</label><input id="remote_ssid">
+      <label>Password:</label><input id="remote_pass" type="password">
     </div>
 
     <button id="save-button" type="submit">Save</button> 
