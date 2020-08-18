@@ -10,13 +10,13 @@ function configure(json) {
     $('#save-button').click(onSaveButtonClicked);
     $('#save-button').click(onSaveButtonClicked);
 
-    $('#network').keypress(onKeyPressed);
-    $('#password').keypress(onKeyPressed);
+    $('#local_ssid').keypress(onKeyPressed);
+    $('#local_pass').keypress(onKeyPressed);
 
     $('#local-scad-code').text(json.local_mac);
     $('#remote-scad-code').text(json.remote_mac);
 
-    $('#network').text(json.local_ssid);
+    $('#local_ssid').text(json.local_ssid);
     //TODO: use the password length to display
 
     if(json.local_paired_status == "pairing") {
