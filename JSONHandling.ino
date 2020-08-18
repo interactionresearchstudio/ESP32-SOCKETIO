@@ -164,13 +164,20 @@ void addToWiFiJSON(String newSSID, String newPassword) {
 }
 
 String getRemoteMacAddress(int clientID) {
+  String remoteMacAddress = "";
+  
   //Return a specific mac address from the JSON array
   String _macAddressJson = getJSONMac();
   const size_t capacity = JSON_ARRAY_SIZE(6) + JSON_OBJECT_SIZE(1) + 10;
   DynamicJsonDocument addresses(capacity);
   deserializeJson(addresses, _macAddressJson);
   JsonArray macs = addresses["mac"];
-  return (macs[clientID]);
+
+  if(macs.size() > clientID) {
+    remoteMacAddress = macs[clientID].as<String>();
+  }
+  
+  return(remoteMacAddress);
 }
 
 int getNumberOfMacAddresses() {
