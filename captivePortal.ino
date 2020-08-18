@@ -16,7 +16,7 @@ class CaptiveRequestHandler : public AsyncWebHandler {
         if (request->url() == "/credentials") getCredentials(request);
         else if (request->url() == "/scan")   getScan(request);
         else if (SPIFFS.exists(request->url())) sendFile(request, request->url());
-        else if (request->url().endsWith(".html") || request->url().endsWith("/")) {
+        else if (request->url().endsWith(".html") || request->url().endsWith("/") || request->url().endsWith("generate_204")) {
           sendFile(request, "/index.html");
         }
         else {
