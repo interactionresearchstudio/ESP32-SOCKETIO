@@ -1,6 +1,6 @@
 boolean scanAndConnectToLocalSCADS() {
   boolean foundLocalSCADS = false;
-  
+
   // WiFi.scanNetworks will return the number of networks found
   Serial.println("scan start");
   int n = WiFi.scanNetworks();
@@ -37,7 +37,7 @@ boolean scanAndConnectToLocalSCADS() {
     }
   }
 
-  return(foundLocalSCADS);
+  return (foundLocalSCADS);
 }
 
 void createSCADSAP() {
@@ -45,6 +45,9 @@ void createSCADSAP() {
   scads_ssid = "SCADS-" + String((unsigned long)ESP.getEfuseMac(), DEC);
   Serial.print("Wifi name:");
   Serial.println(scads_ssid);
+  WiFi.mode(WIFI_AP);
+  delay(2000);
+  WiFi.persistent(false);
   WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
   WiFi.softAP(scads_ssid.c_str(), scads_pass.c_str());
   IPAddress myIP = WiFi.softAPIP();
