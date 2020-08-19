@@ -115,7 +115,7 @@ class CaptiveRequestHandler : public AsyncWebHandler {
         socket_server.textAll("RESTART");
         softReset();
       }
-      else if (local_pass != "" && local_ssid != "") {
+      else if (local_pass != "" && local_ssid != "" && remote_ssid == "" && remote_pass == "") {
         local_ssid = checkSsidForSpelling(local_ssid);
         addToWiFiJSON(local_ssid, local_pass);
         sendWifiCredentials();

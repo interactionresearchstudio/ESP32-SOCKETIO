@@ -40,10 +40,3 @@ void setupLocalServer() {
   server.begin();
   Serial.println("Local Socket server started");
 }
-
-void resetBoards() {
-  long softReset = millis();
-  while (millis() - softReset < 3000) {
-  }
-  ESP.restart();
-}
