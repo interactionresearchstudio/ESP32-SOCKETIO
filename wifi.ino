@@ -41,6 +41,7 @@ void createSCADSAP() {
   scads_ssid = "SCADS-" + String((unsigned long)ESP.getEfuseMac(), DEC);
   Serial.print("Wifi name:");
   Serial.println(scads_ssid);
+  WiFi.persistent(false);
   WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
   WiFi.softAP(scads_ssid.c_str(), scads_pass.c_str());
   IPAddress myIP = WiFi.softAPIP();
