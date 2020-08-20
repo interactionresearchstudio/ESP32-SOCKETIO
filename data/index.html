@@ -1,18 +1,40 @@
 <!DOCTYPE html>
 <html><head>
     <script src="jquery-3.1.1.min.js"></script>
+    <script src="script.js"></script>
 
     <link rel="stylesheet" type="text/css" href="style.css">
     <meta charset="utf-8">
   </head>
   <body onload=init()>
-    <script src="script.js"></script>
-    <p>Select your network:</p>
-    <p id="networks-list"></p>
-    <select id="networks-dropdown" name="networks"></select>
-    <label>Network Name:</label><input id="network">
-    <label>Password:</label><input id="password" type="password">
+    <div id="macForm">
+      <p>Your SCAD CODE is:</p>
+      <p id="local-scad-code"></p>
+    </div>
 
-    <button id="save-button" type="button">Save</button> 
-</body>
+    <div id="remoteMacForm-input">
+      <p>Remote SCAD CODE is:</p>
+      <input id="remote-scad-code-input" inputmode="numeric" pattern="[0-9]*" type="text">
+    </div>
+    <div id="remoteMacForm">
+      <p>Remote SCAD CODE is:</p>
+      <p id ="remote-scad-code" inputmode="numeric" pattern="[0-9]*" type="text"></p>
+    </div>
+
+    <div id="localWifiForm">
+      <p>Select your network:</p>
+      <p id="networks-list"></p>
+      <select id="networks-dropdown" name="networks"></select>
+      <label>Network Name:</label><input id="local_ssid">
+      <label>Password:</label><input id="local_pass" type="password">
+    </div>
+
+    <div id="remoteWifiForm">
+      <p>Optionally set remote network:</p>
+      <label>Network Name:</label><input id="remote_ssid">
+      <label>Password:</label><input id="remote_pass" type="password">
+    </div>
+
+    <button id="save-button" type="submit">Save</button> 
+  </body>
 </html>

@@ -2,7 +2,7 @@
 void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len) {
 
   if (type == WS_EVT_CONNECT) {
-    connection = 1;
+    currentPairedStatus = localSetup;
     Serial.println("Websocket client connection received");
     webSocketClientID = client->id();
     Serial.println(client->id());
@@ -39,11 +39,4 @@ void setupLocalServer() {
   server.addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER);//only when requested from AP
   server.begin();
   Serial.println("Local Socket server started");
-}
-
-void resetBoards() {
-  long softReset = millis();
-  while (millis() - softReset < 3000) {
-  }
-  ESP.restart();
 }
