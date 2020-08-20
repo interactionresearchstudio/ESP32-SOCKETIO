@@ -45,8 +45,10 @@ void createSCADSAP() {
   scads_ssid = "SCADS-" + String((unsigned long)ESP.getEfuseMac(), DEC);
   Serial.print("Wifi name:");
   Serial.println(scads_ssid);
+  
   WiFi.mode(WIFI_AP);
   delay(2000);
+
   WiFi.persistent(false);
   WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
   WiFi.softAP(scads_ssid.c_str(), scads_pass.c_str());
@@ -64,7 +66,7 @@ void connectToWifi(String credentials) {
   JsonArray pass = doc["password"];
   if (ssid.size() > 0) {
     for (int i = 0; i < ssid.size(); i++) {
-      wifiMulti.addAP(ssid[i], pass[i]);
+      wifiMulti.addAP(checkSsidForSpelling(ssid[i]).c_str(), pass[i]);
     }
   } else {
     Serial.println("issue with wifi credentials, creating access point");
