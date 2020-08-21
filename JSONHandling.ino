@@ -1,3 +1,4 @@
+#define MAX_NETWORKS_TO_SCAN 5
 
 //JSON Data handling
 bool inList;
@@ -15,7 +16,7 @@ void decodeData(const char* data) {
     if (MAC != "") {
       //save to preferences
       addToMacAddressJSON(MAC);
-      if (isClient == false) {
+      if (currentSetupStatus != setup_client) {
         sendMacJSON();
       }
     } else {
@@ -163,23 +164,61 @@ void addToWiFiJSON(String newSSID, String newPassword) {
 }
 
 String getRemoteMacAddress(int clientID) {
+  String remoteMacAddress = "";
+  
   //Return a specific mac address from the JSON array
   String _macAddressJson = getJSONMac();
   const size_t capacity = JSON_ARRAY_SIZE(6) + JSON_OBJECT_SIZE(1) + 10;
   DynamicJsonDocument addresses(capacity);
   deserializeJson(addresses, _macAddressJson);
   JsonArray macs = addresses["mac"];
-  return (macs[clientID]);
+
+  if(macs.size() > clientID) {
+    remoteMacAddress = macs[clientID].as<String>();
+  }
+  
+  return(remoteMacAddress);
 }
 
-int getMacJSONSize() {
+int getNumberOfMacAddresses() {
+  int numberOfMacAddresses = 0;
+  
   //Returns the number of mac address in JSON array
   preferences.begin("scads", false);
-  String requestBody = preferences.getString("mac", "");
+    String macCredentials = preferences.getString("mac", "");
   preferences.end();
-  const size_t capacity = JSON_ARRAY_SIZE(6) + JSON_OBJECT_SIZE(1) + 10;
-  DynamicJsonDocument addresses(capacity);
-  deserializeJson(addresses, requestBody);
-  JsonArray mac = addresses["mac"];
-  return mac.size();
+
+  if (macCredentials != "") {
+    const size_t capacity = JSON_ARRAY_SIZE(6) + JSON_OBJECT_SIZE(1) + 10;
+    DynamicJsonDocument addresses(capacity);
+    deserializeJson(addresses, macCredentials);
+    numberOfMacAddresses = addresses["mac"].size();
+  }
+
+  return(numberOfMacAddresses);
+}
+
+String getScanAsJsonString() {
+  String jsonString;
+
+  StaticJsonDocument<1000> jsonDoc;
+  getScanAsJson(jsonDoc);
+  serializeJson(jsonDoc[0], jsonString);
+
+  return (jsonString);
+}
+
+void getScanAsJson(JsonDocument& jsonDoc) {
+  JsonArray networks = jsonDoc.createNestedArray();
+
+  int n = WiFi.scanNetworks();
+  n = (n > MAX_NETWORKS_TO_SCAN) ? MAX_NETWORKS_TO_SCAN : n;
+
+  //Array is ordered by signal strength - strongest first
+  for (int i = 0; i < n; ++i) {
+    JsonObject network  = networks.createNestedObject();
+    network["SSID"] = WiFi.SSID(i);
+    network["BSSID"] = WiFi.BSSIDstr(i);
+    network["RSSI"] = WiFi.RSSI(i);
+  }
 }
