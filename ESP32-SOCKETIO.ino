@@ -1,3 +1,5 @@
+#define DEV
+
 #define EXTERNAL_BUTTON 23
 #define EXTERNAL_LED1 21
 #define EXTERNAL_LED2 19
@@ -29,7 +31,7 @@ enum SETUP_STATUS {
 };
 int currentSetupStatus = setup_pending;
 
-#define VERSION "v0.2dev"
+#define VERSION "v0.2"
 #define ESP32set
 #define WIFICONNECTTIMEOUT 60000
 

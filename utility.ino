@@ -1,6 +1,6 @@
 void setupPins() {
   pinMode(LED_BUILTIN, OUTPUT);
-  
+
   pinMode(BUTTON_BUILTIN, INPUT);
   pinMode(EXTERNAL_BUTTON, INPUT_PULLUP);
 
@@ -80,15 +80,17 @@ void blinkOnConnect() {
 // button functions
 void handleButtonEvent(AceButton* button, uint8_t eventType, uint8_t buttonState) {
   Serial.println(button->getId());
-  
+
   switch (eventType) {
     case AceButton::kEventPressed:
       break;
     case AceButton::kEventReleased:
-      if(currentSetupStatus == setup_finished) socketIO_sendButtonPress();
+      if (currentSetupStatus == setup_finished) socketIO_sendButtonPress();
       break;
     case AceButton::kEventLongPressed:
+#ifdef DEV
       factoryReset();
+#endif
       break;
     case AceButton::kEventRepeatPressed:
       break;
@@ -98,9 +100,9 @@ void handleButtonEvent(AceButton* button, uint8_t eventType, uint8_t buttonState
 //reset functions
 void factoryReset() {
   Serial.println("factoryReset");
-  
+
   preferences.begin("scads", false);
-    preferences.clear();
+  preferences.clear();
   preferences.end();
   currentSetupStatus = setup_pending;
 
