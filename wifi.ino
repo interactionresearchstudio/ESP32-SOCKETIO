@@ -90,6 +90,7 @@ void connectToWifi(String credentials) {
   Serial.println("WiFi connected");
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
+  disconnected = false;
 }
 
 String checkSsidForSpelling(String incomingSSID) {
