@@ -93,7 +93,9 @@ void handleButtonEvent(AceButton* button, uint8_t eventType, uint8_t buttonState
       if (currentSetupStatus == setup_finished) socketIO_sendButtonPress();
       break;
     case AceButton::kEventLongPressed:
+#ifdef DEV
       factoryReset();
+#endif
       break;
     case AceButton::kEventRepeatPressed:
       break;
