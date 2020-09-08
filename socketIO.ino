@@ -22,28 +22,48 @@ void socketIO_event(const char * payload, size_t length) {
 
 void socketIO_msg(const char * payload, size_t length) {
   Serial.println("got msg");
-  const size_t capacity = JSON_OBJECT_SIZE(2) + 50;
+  const size_t capacity = 2 * JSON_OBJECT_SIZE(2) + 60;
   DynamicJsonDocument incomingDoc(capacity);
   deserializeJson(incomingDoc, payload);
   const char* recMacAddress = incomingDoc["macAddress"];
-  const char* recData = incomingDoc["data"];
+  const char* data_project = incomingDoc["data"]["project"];
+
   Serial.print("I got a message from ");
   Serial.println(recMacAddress);
-  Serial.print("Which is ");
-  Serial.println(recData);
-  String testt = String(recData);
-  if (testt.indexOf("hello") > -1) {
+  Serial.print("Which is of type ");
+  Serial.println(data_project);
+
+  if (data_project == "lighttouch") {
+    long data_hue = incomingDoc["data"]["hue"];
+    Serial.print("Light touch! Hue: ");
+    Serial.println(data_hue);
+    // TODO - Run light touch
+  }
+  else if (data_project == "test") {
     blinkDevice();
   }
-
 }
 
 void socketIO_sendButtonPress() {
   Serial.println("button send");
-  const size_t capacity = JSON_OBJECT_SIZE(2) + 50;
+  const size_t capacity = 2 * JSON_OBJECT_SIZE(2);
   DynamicJsonDocument doc(capacity);
   doc["macAddress"] = getRemoteMacAddress(1);
-  doc["data"] = "hello";
+  JsonObject data = doc.createNestedObject("data");
+  data["project"] = "test";
+  String sender;
+  serializeJson(doc, sender);
+  socketIO.emit("msg", sender.c_str());
+}
+
+void socketIO_sendColour() {
+  Serial.println("colour send");
+  const size_t capacity = 2 * JSON_OBJECT_SIZE(2);
+  DynamicJsonDocument doc(capacity);
+  doc["macAddress"] = getRemoteMacAddress(1);
+  JsonObject data = doc.createNestedObject("data");
+  data["project"] = "lighttouch";
+  data["hue"] = hue;
   String sender;
   serializeJson(doc, sender);
   socketIO.emit("msg", sender.c_str());
