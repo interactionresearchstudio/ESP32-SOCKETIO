@@ -17,6 +17,8 @@ bool led3IsPressed = false;
 
 bool disconnected = false;
 
+unsigned long wificheckMillis;
+unsigned long wifiCheckTime = 5000;
 
 enum PAIRED_STATUS {
   remoteSetup,
@@ -211,10 +213,13 @@ void loop() {
   buttonBuiltIn.check();
   buttonExternal.check();
   checkReset();
-  if (currentSetupStatus == setup_finished) {
-    if (wifiMulti.run() !=  WL_CONNECTED) {
-      digitalWrite(LED_BUILTIN, 1);
-      disconnected = true;
+  if (wificheckMillis - millis() > wifiCheckTime) {
+    wificheckMillis = millis();
+    if (currentSetupStatus == setup_finished) {
+      if (wifiMulti.run() !=  WL_CONNECTED) {
+        digitalWrite(LED_BUILTIN, 1);
+        disconnected = true;
+      }
     }
   }
 }

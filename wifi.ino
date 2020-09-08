@@ -108,8 +108,8 @@ String checkSsidForSpelling(String incomingSSID) {
     Serial.println(" networks found");
     for (int i = 0; i < n; ++i) {
       Serial.println(WiFi.SSID(i));
-      currMatch = levenshteinIgnoreCase(incomingSSID.c_str(), WiFi.SSID(i).c_str()) < 3;
-      if (levenshteinIgnoreCase(incomingSSID.c_str(), WiFi.SSID(i).c_str()) < 3) {
+      currMatch = levenshteinIgnoreCase(incomingSSID.c_str(), WiFi.SSID(i).c_str()) < 2;
+      if (levenshteinIgnoreCase(incomingSSID.c_str(), WiFi.SSID(i).c_str()) < 2) {
         if (currMatch < prevMatch) {
           prevMatch = currMatch;
           matchID = i;
