@@ -228,19 +228,11 @@ void loop() {
       socketIO.loop();
       ledHandler();
       pixelUpdate();
+      wifiCheck();
       break;
   }
 
   buttonBuiltIn.check();
   buttonExternal.check();
   checkReset();
-  if (wificheckMillis - millis() > wifiCheckTime) {
-    wificheckMillis = millis();
-    if (currentSetupStatus == setup_finished) {
-      if (wifiMulti.run() !=  WL_CONNECTED) {
-        digitalWrite(LED_BUILTIN, 1);
-        disconnected = true;
-      }
-    }
-  }
 }
