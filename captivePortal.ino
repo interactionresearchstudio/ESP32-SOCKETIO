@@ -16,8 +16,11 @@ class CaptiveRequestHandler : public AsyncWebHandler {
         if (request->url() == "/credentials") getCredentials(request);
         else if (request->url() == "/scan")   getScan(request);
         else if (SPIFFS.exists(request->url())) sendFile(request, request->url());
-        else if (request->url().endsWith(".html") || request->url().endsWith("/") || request->url().endsWith("generate_204")) {
-          sendFile(request, "/index.html");
+        else if (request->url().endsWith(".html") || request->url().endsWith("/") || request->url().endsWith("generate_204") || request->url().endsWith("redirect"))  {
+        sendFile(request, "/index.html");
+        }
+        else if (request->url().endsWith("connecttest.txt")) {
+        request->send(200, "text/plain", "Microsoft NCSI");
         }
         else {
           request->send(404);
@@ -94,7 +97,7 @@ class CaptiveRequestHandler : public AsyncWebHandler {
 
       request->send(response);
     }
-    
+
     void setCredentials(JsonVariant json) {
       Serial.println("setCredentials");
 
@@ -103,7 +106,7 @@ class CaptiveRequestHandler : public AsyncWebHandler {
       String remote_ssid = json["remote_ssid"].as<String>();
       String remote_pass = json["remote_pass"].as<String>();
       String remote_mac = json["remote_mac"].as<String>();
-      
+
       if (remote_mac != "") addToMacAddressJSON(remote_mac);
 
       if (remote_pass != "" && remote_ssid != "" && local_ssid != "" && local_pass != "") {

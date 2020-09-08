@@ -1,3 +1,5 @@
+#define DEV
+
 #define EXTERNAL_BUTTON 23
 #define EXTERNAL_LED1 21
 #define EXTERNAL_LED2 19
@@ -7,12 +9,16 @@
 #define LED_BUILTIN_ON HIGH
 
 int BUTTON_BUILTIN = 0;
-
 bool led2Toggle = true;
-
 #define LED3TIMEON 30000
 long led3PrevTime;
 bool led3IsPressed = false;
+
+
+bool disconnected = false;
+
+unsigned long wificheckMillis;
+unsigned long wifiCheckTime = 5000;
 
 enum PAIRED_STATUS {
   remoteSetup,
@@ -29,7 +35,7 @@ enum SETUP_STATUS {
 };
 int currentSetupStatus = setup_pending;
 
-#define VERSION "v0.2dev"
+#define VERSION "v0.2"
 #define ESP32set
 #define WIFICONNECTTIMEOUT 60000
 
@@ -129,7 +135,7 @@ void setup() {
 
   setPairedStatus();
 
-  if (wifiCredentials == "") {
+  if (wifiCredentials == "" || getNumberOfMacAddresses() < 2) {
     Serial.println("Scanning for available SCADS");
     boolean foundLocalSCADS = scanAndConnectToLocalSCADS();
     if (!foundLocalSCADS) {
@@ -149,6 +155,7 @@ void setup() {
     Serial.print("List of Mac addresses:");
     Serial.println(macCredentials);
     //connect to router to talk to server
+    digitalWrite(LED_BUILTIN, 0);
     connectToWifi(wifiCredentials);
     setupSocketIOEvents();
     currentSetupStatus = setup_finished;
@@ -206,4 +213,13 @@ void loop() {
   buttonBuiltIn.check();
   buttonExternal.check();
   checkReset();
+  if (wificheckMillis - millis() > wifiCheckTime) {
+    wificheckMillis = millis();
+    if (currentSetupStatus == setup_finished) {
+      if (wifiMulti.run() !=  WL_CONNECTED) {
+        digitalWrite(LED_BUILTIN, 1);
+        disconnected = true;
+      }
+    }
+  }
 }
