@@ -1,6 +1,6 @@
 void setupPins() {
   pinMode(LED_BUILTIN, OUTPUT);
-  
+
   pinMode(BUTTON_BUILTIN, INPUT);
   pinMode(EXTERNAL_BUTTON, INPUT_PULLUP);
 
@@ -11,6 +11,11 @@ void setupPins() {
 
   ButtonConfig* buttonExternalConfig = buttonExternal.getButtonConfig();
   buttonExternalConfig->setEventHandler(handleButtonEvent);
+
+  touchConfig.setFeature(ButtonConfig::kFeatureClick);
+  touchConfig.setFeature(ButtonConfig::kFeatureLongPress);
+  touchConfig.setEventHandler(handleTouchEvent);
+  touchConfig.setLongPressDelay(LONG_TOUCH);
 
   pinMode(EXTERNAL_LED1, OUTPUT);
   pinMode(EXTERNAL_LED2, OUTPUT);
@@ -80,12 +85,12 @@ void blinkOnConnect() {
 // button functions
 void handleButtonEvent(AceButton* button, uint8_t eventType, uint8_t buttonState) {
   Serial.println(button->getId());
-  
+
   switch (eventType) {
     case AceButton::kEventPressed:
       break;
     case AceButton::kEventReleased:
-      if(currentSetupStatus == setup_finished) socketIO_sendButtonPress();
+      if (currentSetupStatus == setup_finished) socketIO_sendButtonPress();
       break;
     case AceButton::kEventLongPressed:
       factoryReset();
@@ -95,12 +100,48 @@ void handleButtonEvent(AceButton* button, uint8_t eventType, uint8_t buttonState
   }
 }
 
+// button functions
+void handleTouchEvent(AceButton* button, uint8_t eventType, uint8_t buttonState) {
+  Serial.println(button->getId());
+
+  switch (eventType) {
+    case AceButton::kEventPressed:
+      Serial.println("TOUCH: pressed");
+      break;
+    case AceButton::kEventLongPressed:
+      Serial.println("TOUCH: Long pressed");
+      isSelectingColour = true;
+      // TODO also hold the LED at the colour for a little bit
+      break;
+    case AceButton::kEventReleased:
+      Serial.println("TOUCH: released");
+      isSelectingColour = false;
+      break;
+    case AceButton::kEventClicked:
+      Serial.println("TOUCH: clicked");
+      socketIO_sendColour();
+      break;
+  }
+}
+
+void updateColourSelection() {
+  if (isSelectingColour) {
+    uint32_t currentTime = millis();
+    if (currentTime - prevColourChange >= COLOUR_CHANGE_DELAY) {
+      hue += 1;
+      if (hue > 360) hue = 0;
+      Serial.println(hue);
+      prevColourChange = currentTime;
+    }
+  }
+}
+
 //reset functions
 void factoryReset() {
   Serial.println("factoryReset");
-  
+
   preferences.begin("scads", false);
-    preferences.clear();
+  preferences.clear();
   preferences.end();
   currentSetupStatus = setup_pending;
 
