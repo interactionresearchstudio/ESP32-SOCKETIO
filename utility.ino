@@ -11,6 +11,11 @@ void setupPins() {
 
   ButtonConfig* buttonExternalConfig = buttonExternal.getButtonConfig();
   buttonExternalConfig->setEventHandler(handleButtonEvent);
+  
+  touchConfig.setFeature(ButtonConfig::kFeatureClick);
+  touchConfig.setFeature(ButtonConfig::kFeatureLongPress);
+  touchConfig.setEventHandler(handleTouchEvent);
+  touchConfig.setLongPressDelay(LONG_TOUCH);
 }
 
 //internal led functions
@@ -89,7 +94,7 @@ void handleTouchEvent(AceButton* button, uint8_t eventType, uint8_t buttonState)
   }
 }
 
-void updateColourSelection() {
+/*void updateColourSelection() {
   if (isSelectingColour) {
     uint32_t currentTime = millis();
     if (currentTime - prevColourChange >= COLOUR_CHANGE_DELAY) {
@@ -100,6 +105,7 @@ void updateColourSelection() {
     }
   }
 }
+*/
 
 //reset functions
 void factoryReset() {

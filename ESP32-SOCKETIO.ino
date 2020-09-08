@@ -1,9 +1,6 @@
 #define DEV
 
 #define EXTERNAL_BUTTON 23
-#define EXTERNAL_LED1 21
-#define EXTERNAL_LED2 19
-#define EXTERNAL_LED3 18
 #define CAPTOUCH T0
 
 #define LED_BUILTIN 2
@@ -80,7 +77,7 @@ unsigned long prevPixelMillis;
 unsigned long remoteLedFadeMinutes;
 unsigned long prevlongPixelMillis;
 bool isRemoteLedFading = false;
-Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel pixels(NUMPIXELS, WS2811PIN, NEO_GRB + NEO_KHZ800);
 
 
 #include "SPIFFS.h"
@@ -263,6 +260,5 @@ void loop() {
   buttonBuiltIn.check();
   buttonExternal.check();
   buttonTouch.check();
-  updateColourSelection();
   checkReset();
 }

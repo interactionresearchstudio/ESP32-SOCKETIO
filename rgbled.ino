@@ -9,21 +9,25 @@ void setupPixels() {
 
   pixels.begin(); // INITIALIZE NeoPixel strip object (REQUIRED)
   delay(1000);
-  pixels.clear();
+  pixels.setPixelColor(USERLED, pixels.ColorHSV(40000, userSat, userVal));
+  pixels.show();
+  delay(100);
+  pixels.setPixelColor(USERLED, pixels.ColorHSV(0, 0, 0));
+  pixels.show();
+  delay(100);
 }
 
 void pixelUpdate() {
   unsigned long millisCheck = millis();
   if (millisCheck - prevPixelMillis > PIXELUPDATETIME) {
-    /*if(isButtonHeld() == true){
-       cycleHue(USERLED);
-       }
-    */
+    if (isSelectingColour == true) {
+      cycleHue(USERLED);
+    }
     prevPixelMillis = millisCheck;
     if (ledHasUpdated) {
       ledHasUpdated = false;
       pixels.setPixelColor(USERLED, pixels.ColorHSV(userHue, userSat, userVal));
-      pixels.setPixelColor(REMOTELED, pixels.ColorHSV(remoteHue, remoteSat, remoteVal));
+      //  pixels.setPixelColor(REMOTELED, pixels.ColorHSV(remoteHue, remoteSat, remoteVal));
       pixels.show();
     }
 
@@ -39,7 +43,7 @@ void cycleHue(int led) {
     //user led
     case 0:
       if (userHue < 65536) {
-        userHue = userHue + 10;
+        userHue = userHue + 500;
       } else {
         userHue = 0;
       }
@@ -48,7 +52,7 @@ void cycleHue(int led) {
     // remote led
     case 1:
       if (remoteHue < 65536) {
-        remoteHue = remoteHue + 10;
+        remoteHue = remoteHue + 300;
       } else {
         remoteHue = 0;
       }
