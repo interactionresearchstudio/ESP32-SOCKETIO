@@ -17,10 +17,10 @@ class CaptiveRequestHandler : public AsyncWebHandler {
         else if (request->url() == "/scan")   getScan(request);
         else if (SPIFFS.exists(request->url())) sendFile(request, request->url());
         else if (request->url().endsWith(".html") || request->url().endsWith("/") || request->url().endsWith("generate_204") || request->url().endsWith("redirect"))  {
-        sendFile(request, "/index.html");
+          sendFile(request, "/index.html");
         }
         else if (request->url().endsWith("connecttest.txt")) {
-        request->send(200, "text/plain", "Microsoft NCSI");
+          request->send(200, "text/plain", "Microsoft NCSI");
         }
         else {
           request->send(404);

@@ -9,10 +9,6 @@
 #define LED_BUILTIN_ON HIGH
 
 int BUTTON_BUILTIN = 0;
-bool led2Toggle = true;
-#define LED3TIMEON 30000
-long led3PrevTime;
-bool led3IsPressed = false;
 
 
 bool disconnected = false;
@@ -61,6 +57,30 @@ SocketIoClient socketIO;
 
 #include <AceButton.h>
 using namespace ace_button;
+
+#include <Adafruit_NeoPixel.h>
+#define WS2811PIN        5
+#define NUMPIXELS 2
+#define PIXELUPDATETIME 50
+#define PIXELUPDATETIMELONG 5000
+#define USERLED 0
+#define REMOTELED 1
+#define REMOTELEDFADE 720
+#define REMOTELEDPWMSTART 200
+uint16_t userHue;
+uint16_t remoteHue;
+uint8_t userSat;
+uint8_t remoteSat;
+uint8_t userVal;
+uint8_t remoteVal;
+uint8_t prevRemoteSat;
+bool ledHasUpdated = false;
+unsigned long prevPixelMillis;
+unsigned long remoteLedFadeMinutes;
+unsigned long prevlongPixelMillis;
+bool isRemoteLedFading = false;
+Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
+
 
 #include "SPIFFS.h"
 
@@ -116,6 +136,7 @@ int port = 80; // Socket.IO Port Address
 char path[] = "/socket.io/?transport=websocket"; // Socket.IO Base Path
 
 void setup() {
+  setupPixels();
   Serial.begin(115200);
   setupPins();
 
@@ -206,7 +227,7 @@ void loop() {
     case setup_finished:
       socketIO.loop();
       ledHandler();
-      led3Handler();
+      pixelUpdate();
       break;
   }
 
