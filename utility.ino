@@ -11,7 +11,7 @@ void setupPins() {
 
   ButtonConfig* buttonExternalConfig = buttonExternal.getButtonConfig();
   buttonExternalConfig->setEventHandler(handleButtonEvent);
-  
+
   touchConfig.setFeature(ButtonConfig::kFeatureClick);
   touchConfig.setFeature(ButtonConfig::kFeatureLongPress);
   touchConfig.setEventHandler(handleTouchEvent);
@@ -86,27 +86,17 @@ void handleTouchEvent(AceButton* button, uint8_t eventType, uint8_t buttonState)
     case AceButton::kEventReleased:
       Serial.println("TOUCH: released");
       isSelectingColour = false;
+      ledChanged[USERLED] = true;
+      fadeRGB(USERLED);
       break;
     case AceButton::kEventClicked:
       Serial.println("TOUCH: clicked");
-      blinkRGB();
+      ledChanged[USERLED] = true;
+      fadeRGB(USERLED);
       socketIO_sendColour();
       break;
   }
 }
-
-/*void updateColourSelection() {
-  if (isSelectingColour) {
-    uint32_t currentTime = millis();
-    if (currentTime - prevColourChange >= COLOUR_CHANGE_DELAY) {
-      hue += 1;
-      if (hue > 360) hue = 0;
-      Serial.println(hue);
-      prevColourChange = currentTime;
-    }
-  }
-}
-*/
 
 //reset functions
 void factoryReset() {

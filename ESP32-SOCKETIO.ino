@@ -56,6 +56,7 @@ SocketIoClient socketIO;
 #include <AceButton.h>
 using namespace ace_button;
 
+//rgb led variables
 #include <FastLED.h>
 #define WS2811PIN        5
 #define NUMPIXELS 2
@@ -63,22 +64,22 @@ using namespace ace_button;
 #define PIXELUPDATETIMELONG 5000
 #define USERLED 0
 #define REMOTELED 1
-#define REMOTELEDFADE 720
-#define REMOTELEDPWMSTART 200
-uint8_t userHue;
-uint8_t remoteHue;
-uint8_t userSat;
-uint8_t remoteSat;
-uint8_t userVal;
-uint8_t remoteVal;
+#define RGBLEDPWMSTART 120
+uint8_t hue[NUMPIXELS];
+uint8_t saturation[NUMPIXELS];
+uint8_t value[NUMPIXELS];
 uint8_t prevRemoteSat;
-bool ledHasUpdated = false;
-bool led2HasChanged = false;
+bool ledChanged[NUMPIXELS] = {false,false};
 unsigned long prevPixelMillis;
-unsigned long remoteLedFadeMinutes;
+bool isLongFade = false;
 unsigned long prevlongPixelMillis;
 bool isRemoteLedFading = false;
 CRGB leds[NUMPIXELS];
+bool readyToFadeRGB[NUMPIXELS] = {false,false};
+bool isFadingRGB[NUMPIXELS] = {false,false};
+unsigned long fadeTimeRGB[NUMPIXELS];
+#define RGBFADEMILLIS 6
+
 
 
 #include "SPIFFS.h"
@@ -134,9 +135,6 @@ class CapacitiveConfig: public ButtonConfig {
 CapacitiveConfig touchConfig(CAPTOUCH, TOUCH_THRESHOLD);
 AceButton buttonTouch(&touchConfig);
 bool isSelectingColour = false;
-uint16_t hue = 0;
-uint32_t prevColourChange;
-#define COLOUR_CHANGE_DELAY 20
 
 //Button Settings
 AceButton buttonBuiltIn(BUTTON_BUILTIN);
@@ -253,7 +251,7 @@ void loop() {
     case setup_finished:
       socketIO.loop();
       ledHandler();
-      pixelUpdate();
+      rgbLedHandler();
       wifiCheck();
       break;
   }
