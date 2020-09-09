@@ -59,7 +59,7 @@ using namespace ace_button;
 #include <FastLED.h>
 #define WS2811PIN        5
 #define NUMPIXELS 2
-#define PIXELUPDATETIME 50
+#define PIXELUPDATETIME 30
 #define PIXELUPDATETIMELONG 5000
 #define USERLED 0
 #define REMOTELED 1
@@ -73,6 +73,7 @@ uint8_t userVal;
 uint8_t remoteVal;
 uint8_t prevRemoteSat;
 bool ledHasUpdated = false;
+bool led2HasChanged = false;
 unsigned long prevPixelMillis;
 unsigned long remoteLedFadeMinutes;
 unsigned long prevlongPixelMillis;

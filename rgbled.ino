@@ -2,8 +2,8 @@ void setupPixels() {
 
   userSat = 255;
   remoteSat = 255;
-  userVal = 255;
-  remoteVal = 255;
+  userVal = 180;
+  remoteVal = 180;
   userHue = 0;
   remoteHue = 0;
 
@@ -27,11 +27,18 @@ void pixelUpdate() {
       FastLED.show();
 
     }
+    if (led2HasChanged) {
+      led2HasChanged = false;
+      leds[1] = CHSV(remoteHue, remoteSat, remoteVal);
+      FastLED.show();
+    }
 
   }
   if (millisCheck - prevlongPixelMillis > PIXELUPDATETIMELONG) {
     prevlongPixelMillis = millisCheck;
     ledHasUpdated = true;
+    led2HasChanged = true;
+    
   }
 }
 

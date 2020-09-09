@@ -33,11 +33,13 @@ void socketIO_msg(const char * payload, size_t length) {
   Serial.print("Which is of type ");
   Serial.println(data_project);
 
-  if (data_project == "lighttouch") {
+  if (String(data_project) == "lighttouch") {
     long data_hue = incomingDoc["data"]["hue"];
     Serial.print("Light touch! Hue: ");
     Serial.println(data_hue);
     // TODO - Run light touch
+    remoteHue = (uint8_t)data_hue;
+    led2HasChanged = true;
   }
   else if (data_project == "test") {
     blinkDevice();
