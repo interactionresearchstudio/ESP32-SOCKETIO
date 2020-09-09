@@ -1,19 +1,12 @@
 #define DEV
 
 #define EXTERNAL_BUTTON 23
-#define EXTERNAL_LED1 21
-#define EXTERNAL_LED2 19
-#define EXTERNAL_LED3 18
 #define CAPTOUCH T0
 
 #define LED_BUILTIN 2
 #define LED_BUILTIN_ON HIGH
 
 int BUTTON_BUILTIN = 0;
-bool led2Toggle = true;
-#define LED3TIMEON 30000
-long led3PrevTime;
-bool led3IsPressed = false;
 
 bool disconnected = false;
 
@@ -62,6 +55,31 @@ SocketIoClient socketIO;
 
 #include <AceButton.h>
 using namespace ace_button;
+
+#include <FastLED.h>
+#define WS2811PIN        5
+#define NUMPIXELS 2
+#define PIXELUPDATETIME 30
+#define PIXELUPDATETIMELONG 5000
+#define USERLED 0
+#define REMOTELED 1
+#define REMOTELEDFADE 720
+#define REMOTELEDPWMSTART 200
+uint8_t userHue;
+uint8_t remoteHue;
+uint8_t userSat;
+uint8_t remoteSat;
+uint8_t userVal;
+uint8_t remoteVal;
+uint8_t prevRemoteSat;
+bool ledHasUpdated = false;
+bool led2HasChanged = false;
+unsigned long prevPixelMillis;
+unsigned long remoteLedFadeMinutes;
+unsigned long prevlongPixelMillis;
+bool isRemoteLedFading = false;
+CRGB leds[NUMPIXELS];
+
 
 #include "SPIFFS.h"
 
@@ -144,6 +162,7 @@ int port = 80; // Socket.IO Port Address
 char path[] = "/socket.io/?transport=websocket"; // Socket.IO Base Path
 
 void setup() {
+  setupPixels();
   Serial.begin(115200);
   setupPins();
 
@@ -234,22 +253,13 @@ void loop() {
     case setup_finished:
       socketIO.loop();
       ledHandler();
-      led3Handler();
+      pixelUpdate();
+      wifiCheck();
       break;
   }
 
   buttonBuiltIn.check();
   buttonExternal.check();
   buttonTouch.check();
-  updateColourSelection();
   checkReset();
-  if (wificheckMillis - millis() > wifiCheckTime) {
-    wificheckMillis = millis();
-    if (currentSetupStatus == setup_finished) {
-      if (wifiMulti.run() !=  WL_CONNECTED) {
-        digitalWrite(LED_BUILTIN, 1);
-        disconnected = true;
-      }
-    }
-  }
 }

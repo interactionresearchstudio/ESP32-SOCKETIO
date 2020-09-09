@@ -33,16 +33,16 @@ void socketIO_msg(const char * payload, size_t length) {
   Serial.print("Which is of type ");
   Serial.println(data_project);
 
-  if (data_project == "lighttouch") {
+  if (String(data_project) == "lighttouch") {
     long data_hue = incomingDoc["data"]["hue"];
     Serial.print("Light touch! Hue: ");
     Serial.println(data_hue);
     // TODO - Run light touch
+    remoteHue = (uint8_t)data_hue;
+    led2HasChanged = true;
   }
   else if (data_project == "test") {
     blinkDevice();
-    Led2Toggle();
-    led3LongOn();
   }
 }
 
@@ -60,12 +60,12 @@ void socketIO_sendButtonPress() {
 
 void socketIO_sendColour() {
   Serial.println("colour send");
-  const size_t capacity = 2 * JSON_OBJECT_SIZE(2);
+  const size_t capacity = 3 * JSON_OBJECT_SIZE(2);
   DynamicJsonDocument doc(capacity);
   doc["macAddress"] = getRemoteMacAddress(1);
   JsonObject data = doc.createNestedObject("data");
   data["project"] = "lighttouch";
-  data["hue"] = hue;
+  data["hue"] = String((int)userHue);
   String sender;
   serializeJson(doc, sender);
   socketIO.emit("msg", sender.c_str());

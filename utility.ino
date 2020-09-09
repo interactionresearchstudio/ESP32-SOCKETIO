@@ -11,42 +11,12 @@ void setupPins() {
 
   ButtonConfig* buttonExternalConfig = buttonExternal.getButtonConfig();
   buttonExternalConfig->setEventHandler(handleButtonEvent);
-
+  
   touchConfig.setFeature(ButtonConfig::kFeatureClick);
   touchConfig.setFeature(ButtonConfig::kFeatureLongPress);
   touchConfig.setEventHandler(handleTouchEvent);
   touchConfig.setLongPressDelay(LONG_TOUCH);
-
-  pinMode(EXTERNAL_LED1, OUTPUT);
-  pinMode(EXTERNAL_LED2, OUTPUT);
-  pinMode(EXTERNAL_LED3, OUTPUT);
-  digitalWrite(EXTERNAL_LED1, HIGH);
-  digitalWrite(EXTERNAL_LED2, HIGH);
-  digitalWrite(EXTERNAL_LED3, HIGH);
 }
-
-//external led functions
-
-void Led2Toggle() {
-  led2Toggle = !led2Toggle;
-  digitalWrite(EXTERNAL_LED2, led2Toggle);
-}
-
-void led3LongOn() {
-  if (led3IsPressed == false) {
-    led3IsPressed = true;
-    led3PrevTime = millis();
-    digitalWrite(EXTERNAL_LED3, LOW);
-  }
-}
-
-void led3Handler() {
-  if (led3IsPressed == true && millis() - led3PrevTime > LED3TIMEON) {
-    led3IsPressed = false;
-    digitalWrite(EXTERNAL_LED3, HIGH);
-  }
-}
-
 
 //internal led functions
 
@@ -61,11 +31,9 @@ void ledHandler() {
     isBlinking = true;
     blinkTime = millis();
     digitalWrite(LED_BUILTIN, 1);
-    digitalWrite(EXTERNAL_LED1, 0);
   }
   if (millis() - blinkTime > blinkDuration && isBlinking == true) {
     digitalWrite(LED_BUILTIN, 0);
-    digitalWrite(EXTERNAL_LED1, 1);
     isBlinking = false;
     readyToBlink = false;
   }
@@ -121,12 +89,13 @@ void handleTouchEvent(AceButton* button, uint8_t eventType, uint8_t buttonState)
       break;
     case AceButton::kEventClicked:
       Serial.println("TOUCH: clicked");
+      blinkRGB();
       socketIO_sendColour();
       break;
   }
 }
 
-void updateColourSelection() {
+/*void updateColourSelection() {
   if (isSelectingColour) {
     uint32_t currentTime = millis();
     if (currentTime - prevColourChange >= COLOUR_CHANGE_DELAY) {
@@ -137,6 +106,7 @@ void updateColourSelection() {
     }
   }
 }
+*/
 
 //reset functions
 void factoryReset() {

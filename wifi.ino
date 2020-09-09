@@ -45,7 +45,7 @@ void createSCADSAP() {
   scads_ssid = "SCADS-" + String((unsigned long)ESP.getEfuseMac(), DEC);
   Serial.print("Wifi name:");
   Serial.println(scads_ssid);
-  
+
   WiFi.mode(WIFI_AP);
   delay(2000);
 
@@ -122,6 +122,16 @@ String checkSsidForSpelling(String incomingSSID) {
     } else {
       Serial.println("can't find any wifi that are close enough matches in the area");
       return incomingSSID;
+    }
+  }
+}
+
+void wifiCheck() {
+  if (wificheckMillis - millis() > wifiCheckTime) {
+    wificheckMillis = millis();
+    if (wifiMulti.run() !=  WL_CONNECTED) {
+      digitalWrite(LED_BUILTIN, 1);
+      disconnected = true;
     }
   }
 }
