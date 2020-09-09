@@ -38,7 +38,7 @@ void socketIO_msg(const char * payload, size_t length) {
     Serial.print("Light touch! Hue: ");
     Serial.println(data_hue);
     // TODO - Run light touch
-    remoteHue = (uint8_t)data_hue;
+    hue[REMOTELED] = (uint8_t)data_hue;
     led2HasChanged = true;
   }
   else if (data_project == "test") {
@@ -65,7 +65,7 @@ void socketIO_sendColour() {
   doc["macAddress"] = getRemoteMacAddress(1);
   JsonObject data = doc.createNestedObject("data");
   data["project"] = "lighttouch";
-  data["hue"] = String((int)userHue);
+  data["hue"] = String((int)getUserHue());
   String sender;
   serializeJson(doc, sender);
   socketIO.emit("msg", sender.c_str());
