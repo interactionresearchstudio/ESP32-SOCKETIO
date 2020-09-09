@@ -56,7 +56,7 @@ SocketIoClient socketIO;
 #include <AceButton.h>
 using namespace ace_button;
 
-#include <Adafruit_NeoPixel.h>
+#include <FastLED.h>
 #define WS2811PIN        5
 #define NUMPIXELS 2
 #define PIXELUPDATETIME 50
@@ -65,8 +65,8 @@ using namespace ace_button;
 #define REMOTELED 1
 #define REMOTELEDFADE 720
 #define REMOTELEDPWMSTART 200
-uint16_t userHue;
-uint16_t remoteHue;
+uint8_t userHue;
+uint8_t remoteHue;
 uint8_t userSat;
 uint8_t remoteSat;
 uint8_t userVal;
@@ -77,7 +77,7 @@ unsigned long prevPixelMillis;
 unsigned long remoteLedFadeMinutes;
 unsigned long prevlongPixelMillis;
 bool isRemoteLedFading = false;
-Adafruit_NeoPixel pixels(NUMPIXELS, WS2811PIN, NEO_GRB + NEO_KHZ800);
+CRGB leds[NUMPIXELS];
 
 
 #include "SPIFFS.h"

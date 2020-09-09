@@ -7,14 +7,11 @@ void setupPixels() {
   userHue = 0;
   remoteHue = 0;
 
-  pixels.begin(); // INITIALIZE NeoPixel strip object (REQUIRED)
+  FastLED.addLeds<WS2811, WS2811PIN, RGB>(leds, NUMPIXELS);
+  fill_solid(leds, NUMPIXELS, CRGB(0, 0, 0));
+  FastLED.show();
   delay(1000);
-  pixels.setPixelColor(USERLED, pixels.ColorHSV(40000, userSat, userVal));
-  pixels.show();
-  delay(100);
-  pixels.setPixelColor(USERLED, pixels.ColorHSV(0, 0, 0));
-  pixels.show();
-  delay(100);
+
 }
 
 void pixelUpdate() {
@@ -26,9 +23,9 @@ void pixelUpdate() {
     prevPixelMillis = millisCheck;
     if (ledHasUpdated) {
       ledHasUpdated = false;
-      pixels.setPixelColor(USERLED, pixels.ColorHSV(userHue, userSat, userVal));
-      //  pixels.setPixelColor(REMOTELED, pixels.ColorHSV(remoteHue, remoteSat, remoteVal));
-      pixels.show();
+      leds[0] = CHSV(userHue, userSat, userVal);
+      FastLED.show();
+
     }
 
   }
@@ -42,8 +39,8 @@ void cycleHue(int led) {
   switch (led) {
     //user led
     case 0:
-      if (userHue < 65536) {
-        userHue = userHue + 500;
+      if (userHue < 255) {
+        userHue++;
       } else {
         userHue = 0;
       }
@@ -51,8 +48,8 @@ void cycleHue(int led) {
       break;
     // remote led
     case 1:
-      if (remoteHue < 65536) {
-        remoteHue = remoteHue + 300;
+      if (remoteHue < 255) {
+        remoteHue++;
       } else {
         remoteHue = 0;
       }
