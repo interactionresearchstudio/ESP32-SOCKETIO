@@ -1,4 +1,4 @@
-#define DEV
+//#define DEV
 
 #define EXTERNAL_BUTTON 23
 #define CAPTOUCH T0
@@ -65,6 +65,9 @@ using namespace ace_button;
 #define USERLED 0
 #define REMOTELED 1
 #define RGBLEDPWMSTART 120
+#define LONGFADEMINUTESMAX 720
+#define LONGFADECHECKMILLIS 60000 
+unsigned long  prevLongFadeVal = 0;
 uint8_t hue[NUMPIXELS];
 uint8_t saturation[NUMPIXELS];
 uint8_t value[NUMPIXELS];
@@ -73,6 +76,8 @@ bool ledChanged[NUMPIXELS] = {false,false};
 unsigned long prevPixelMillis;
 bool isLongFade = false;
 unsigned long prevlongPixelMillis;
+unsigned long longFadeMinutes;
+unsigned long prevLongFadeMillis;
 bool isRemoteLedFading = false;
 CRGB leds[NUMPIXELS];
 bool readyToFadeRGB[NUMPIXELS] = {false,false};

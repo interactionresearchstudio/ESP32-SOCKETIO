@@ -41,6 +41,7 @@ void socketIO_msg(const char * payload, size_t length) {
     hue[REMOTELED] = (uint8_t)data_hue;
     ledChanged[REMOTELED] = true;
     fadeRGB(REMOTELED);
+    startLongFade();
   }
   else if (data_project == "test") {
     blinkDevice();
