@@ -65,20 +65,19 @@ using namespace ace_button;
 #define USERLED 0
 #define REMOTELED 1
 #define RGBLEDPWMSTART 120
-uint8_t hue[2];
-uint8_t saturation[2];
-uint8_t value[2];
+uint8_t hue[NUMPIXELS];
+uint8_t saturation[NUMPIXELS];
+uint8_t value[NUMPIXELS];
 uint8_t prevRemoteSat;
-bool ledHasUpdated = false;
-bool led2HasChanged = false;
+bool ledChanged[NUMPIXELS] = {false,false};
 unsigned long prevPixelMillis;
 bool isLongFade = false;
 unsigned long prevlongPixelMillis;
 bool isRemoteLedFading = false;
 CRGB leds[NUMPIXELS];
-bool readyToFadeRGB[2] = {false,false};
-bool isFadingRGB[2] = {false,false};
-unsigned long fadeTimeRGB[2];
+bool readyToFadeRGB[NUMPIXELS] = {false,false};
+bool isFadingRGB[NUMPIXELS] = {false,false};
+unsigned long fadeTimeRGB[NUMPIXELS];
 #define RGBFADEMILLIS 6
 
 

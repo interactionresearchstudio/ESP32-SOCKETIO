@@ -39,7 +39,8 @@ void socketIO_msg(const char * payload, size_t length) {
     Serial.println(data_hue);
     // TODO - Run light touch
     hue[REMOTELED] = (uint8_t)data_hue;
-    led2HasChanged = true;
+    ledChanged[REMOTELED] = true;
+    fadeRGB(REMOTELED);
   }
   else if (data_project == "test") {
     blinkDevice();

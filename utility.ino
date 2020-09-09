@@ -89,6 +89,7 @@ void handleTouchEvent(AceButton* button, uint8_t eventType, uint8_t buttonState)
       break;
     case AceButton::kEventClicked:
       Serial.println("TOUCH: clicked");
+      ledChanged[USERLED] = true;
       fadeRGB(USERLED);
       socketIO_sendColour();
       break;

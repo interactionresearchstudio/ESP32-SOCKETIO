@@ -21,18 +21,17 @@ void rgbLedHandler() {
       cycleHue(USERLED);
     }
     prevPixelMillis = millisCheck;
-    if (ledHasUpdated) {
-      ledHasUpdated = false;
+    if (ledChanged[USERLED]) {
+      ledChanged[USERLED] = false;
       saturation[USERLED] = 255;
       value[USERLED] = 255;
       leds[USERLED] = CHSV(hue[USERLED], saturation[USERLED], value[USERLED]);
       FastLED.show();
     }
-    if (led2HasChanged) {
-      led2HasChanged = false;
+    if (ledChanged[REMOTELED]) {
+      ledChanged[REMOTELED] = false;
       saturation[REMOTELED] = 255;
       value[REMOTELED] = 255;
-      fadeRGB(REMOTELED);
       leds[REMOTELED] = CHSV(hue[REMOTELED], saturation[REMOTELED], value[REMOTELED]);
       FastLED.show();
     }
@@ -45,26 +44,12 @@ void rgbLedHandler() {
 }
 
 void cycleHue(int led) {
-  switch (led) {
-    //user led
-    case 0:
-      if (hue[USERLED] < 255) {
-        hue[USERLED]++;
-      } else {
-        hue[USERLED] = 0;
-      }
-      ledHasUpdated = true;
-      break;
-    // remote led
-    case 1:
-      if (hue[REMOTELED] < 255) {
-        hue[REMOTELED]++;
-      } else {
-        hue[REMOTELED] = 0;
-      }
-      ledHasUpdated = true;
-      break;
+  if (hue[led] < 255) {
+    hue[led]++;
+  } else {
+    hue[led] = 0;
   }
+  ledChanged[led] = true;
 }
 
 uint16_t getUserHue() {
@@ -98,6 +83,7 @@ void fadeRGB(int led) {
 void fadeRGBHandler() {
   for (byte i = 0; i < NUMPIXELS; i++) {
     if (readyToFadeRGB[i] == true && isFadingRGB[i] == false) {
+      ledChanged[i] = true;
       isFadingRGB[i] = true;
       fadeTimeRGB[i] = millis();
       value[i] = 255;
