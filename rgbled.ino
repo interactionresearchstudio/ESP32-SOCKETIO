@@ -1,9 +1,9 @@
 void setupPixels() {
 
-  userSat = 255;
-  remoteSat = 255;
-  userVal = 180;
-  remoteVal = 180;
+  userSat = 0;
+  remoteSat = 0;
+  userVal = 0;
+  remoteVal = 0;
   userHue = 0;
   remoteHue = 0;
 
@@ -23,12 +23,16 @@ void pixelUpdate() {
     prevPixelMillis = millisCheck;
     if (ledHasUpdated) {
       ledHasUpdated = false;
+      userSat = 255;
+      userVal = 255;
       leds[0] = CHSV(userHue, userSat, userVal);
       FastLED.show();
 
     }
     if (led2HasChanged) {
       led2HasChanged = false;
+      remoteSat = 255;
+      remoteVal = 255;
       leds[1] = CHSV(remoteHue, remoteSat, remoteVal);
       FastLED.show();
     }
@@ -36,9 +40,8 @@ void pixelUpdate() {
   }
   if (millisCheck - prevlongPixelMillis > PIXELUPDATETIMELONG) {
     prevlongPixelMillis = millisCheck;
-    ledHasUpdated = true;
-    led2HasChanged = true;
-    
+    FastLED.show();
+
   }
 }
 
@@ -83,4 +86,13 @@ void updateRemoteLedFade() {
 
 uint16_t getUserHue() {
   return userHue;
+}
+
+
+void blinkRGB() {
+  leds[0] = CHSV(userHue, 0, 0);
+  FastLED.show();
+  delay(100);
+  leds[0] = CHSV(userHue, userSat, userVal);
+  FastLED.show();
 }
