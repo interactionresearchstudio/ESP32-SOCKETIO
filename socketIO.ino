@@ -43,7 +43,7 @@ void socketIO_msg(const char * payload, size_t length) {
     fadeRGB(REMOTELED);
     startLongFade();
   }
-  else if (data_project == "test") {
+  else if (String(data_project) == "test") {
     blinkDevice();
   }
 }
