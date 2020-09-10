@@ -42,7 +42,7 @@ boolean scanAndConnectToLocalSCADS() {
 
 void createSCADSAP() {
   //Creates Access Point for other device to connect to
-  scads_ssid = "SCADS-" + String((unsigned long)ESP.getEfuseMac(), DEC);
+  scads_ssid = "Yo-Yo-" + generateID();
   Serial.print("Wifi name:");
   Serial.println(scads_ssid);
 

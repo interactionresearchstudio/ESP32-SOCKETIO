@@ -31,10 +31,11 @@ void rgbLedHandler() {
     if (ledChanged[REMOTELED]) {
       ledChanged[REMOTELED] = false;
       saturation[REMOTELED] = 255;
-      value[REMOTELED] = 255;
+      //  value[REMOTELED] = 255;
       leds[REMOTELED] = CHSV(hue[REMOTELED], saturation[REMOTELED], value[REMOTELED]);
       FastLED.show();
     }
+    longFadeHandler();
   }
   if (millisCheck - prevlongPixelMillis > PIXELUPDATETIMELONG) {
     prevlongPixelMillis = millisCheck;
@@ -65,15 +66,6 @@ void blinkRGB() {
   FastLED.show();
 }
 
-void animateLed(int led) {
-  for (byte i = saturation[REMOTELED]; i > RGBLEDPWMSTART; i--) {
-    leds[led] = CHSV(hue[REMOTELED], saturation[REMOTELED], i);
-    FastLED.show();
-    delay(6);
-  }
-  value[REMOTELED] = RGBLEDPWMSTART;
-}
-
 void fadeRGB(int led) {
   if (readyToFadeRGB[led] == false) {
     readyToFadeRGB[led] = true;
@@ -97,6 +89,32 @@ void fadeRGBHandler() {
       } else {
         isFadingRGB[i] = false;
         readyToFadeRGB[i] = false;
+      }
+    }
+  }
+}
+
+void startLongFade() {
+  isLongFade = true;
+  longFadeMinutes = LONGFADEMINUTESMAX;
+  prevLongFadeVal = 0;
+}
+
+void longFadeHandler() {
+  if (isLongFade) {
+    if (millis() - prevLongFadeMillis > LONGFADECHECKMILLIS) {
+      prevLongFadeMillis = millis();
+      longFadeMinutes--;
+      unsigned long currLongFadeVal = longFadeMinutes / (LONGFADEMINUTESMAX / RGBLEDPWMSTART);
+      if (currLongFadeVal != prevLongFadeVal) {
+        prevLongFadeVal = currLongFadeVal;
+        currLongFadeVal = currLongFadeVal - 1;
+        value[REMOTELED] = (byte)currLongFadeVal;
+        ledChanged[REMOTELED] = true;
+        Serial.println(value[REMOTELED]);
+      }
+      if (longFadeMinutes <= 0) {
+        isLongFade = false;
       }
     }
   }
