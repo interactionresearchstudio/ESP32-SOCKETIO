@@ -29,7 +29,7 @@ enum SETUP_STATUS {
 };
 int currentSetupStatus = setup_pending;
 
-#define VERSION "v0.2"
+#define VERSION "v0.3"
 #define ESP32set
 #define WIFICONNECTTIMEOUT 60000
 
