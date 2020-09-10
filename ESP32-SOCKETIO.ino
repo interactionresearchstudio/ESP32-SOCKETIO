@@ -1,4 +1,5 @@
 //#define DEV
+//#define STAGING
 
 #define EXTERNAL_BUTTON 23
 #define CAPTOUCH T0
@@ -29,6 +30,7 @@ enum SETUP_STATUS {
 };
 int currentSetupStatus = setup_pending;
 
+#define PROJECT_SLUG "ESP32-SOCKETIO"
 #define VERSION "v0.3"
 #define ESP32set
 #define WIFICONNECTTIMEOUT 60000
@@ -207,6 +209,7 @@ void setup() {
     //connect to router to talk to server
     digitalWrite(LED_BUILTIN, 0);
     connectToWifi(wifiCredentials);
+    checkForUpdate();
     setupSocketIOEvents();
     currentSetupStatus = setup_finished;
     Serial.println("setup complete");
