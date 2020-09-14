@@ -15,21 +15,21 @@ function configure(json) {
 
     $('#local_ssid').text(json.local_ssid);
     //TODO: use the password length to display
-     $('#remote-scad-code').text(json.remote_mac);
-     $('#local-scad-code').text(json.local_mac);
+     $('#remote-scad-code').text(formatScadCode(json.remote_mac));
+     $('#local-scad-code').text(formatScadCode(json.local_mac));
 
     if(json.local_paired_status == "remoteSetup") {
         //Show local wifi form, local and remote IDs
         var remoteWifi = document.getElementById("remoteWifiForm");
         remoteWifi.style.display = "none";
         var remoteMac = document.getElementById("remoteMacForm");
-        remoteMac.style.display = "none";
+        remoteMac.style.display = "block";
     } else if(json.local_paired_status == "localSetup"){
         //Show local and remote wifi form
         var remoteWifi = document.getElementById("remoteWifiForm");
         remoteWifi.style.display = "block";
-        var remoteMacInput = document.getElementById("remoteMacForm-input");
-        remoteMacInput.style.display = "none";
+        //var remoteMacInput = document.getElementById("remoteMacForm-input");
+        //remoteMacInput.style.display = "none";
         var remoteMac = document.getElementById("remoteMacForm");
         remoteMac.style.display = "block";
     } else if(json.local_paired_status == "pairedSetup"){
@@ -38,14 +38,16 @@ function configure(json) {
         remoteWifi.style.display = "none";
         var remoteMac = document.getElementById("remoteMacForm");
         remoteMac.style.display = "block";
-        var remoteMacInput = document.getElementById("remoteMacForm-input");
-        remoteMacInput.style.display = "none";
+        //var remoteMacInput = document.getElementById("remoteMacForm-input");
+        //remoteMacInput.style.display = "none";
     } 
 
-    $('#networks-dropdown').change(onNetworksDropdownChanged);
-    $('#networks-dropdown').attr('disabled', true);
-
+    $('#local_ssid').attr('disabled', true);
     populateNetworksList();
+}
+
+function formatScadCode(code) {
+    return(code.slice(0, 4) + ' ' + code.slice(4));
 }
 
 function onKeyPressed(event) {
@@ -56,32 +58,22 @@ function onKeyPressed(event) {
 }
 
 function populateNetworksList() {
-    let dropdown = $('#networks-dropdown');
-    let list = $('#networks-list');
-
-    dropdown.empty();
-
-    dropdown.append('<option selected="true" disabled>Choose Network</option>');
-    dropdown.prop('selectedIndex', 0);
+    let networks = $('#networks-list-select');
+    networks.empty();
 
     $.getJSON('/scan', function (json) {
         $.each(json, function (key, entry) {
-            dropdown.append($('<option></option>').attr('value', entry.SSID).text(entry.SSID));
-            dropdown.append($('<p></p>').text(entry.SSID));
+            networks.append($('<option></option>').attr('value', entry.SSID));
         });
-        $('#networks-dropdown').attr('disabled', false);
+        $('#local_ssid').attr('disabled', false);
     });
-}
-
-function onNetworksDropdownChanged() {
-    $('#local_ssid').val($("#networks-dropdown :selected").text());
 }
 
 function onSaveButtonClicked() {
     var data = {
         local_ssid: $('#local_ssid').val(),
         local_pass: $('#local_pass').val(),
-        remote_mac: $('#remote-scad-code-input').val(),
+        remote_mac: $('#remote-scad-code-input').val().replace(/\s/g,''),
         remote_ssid: $('#remote_ssid').val(),
         remote_pass: $('#remote_pass').val()
     };
