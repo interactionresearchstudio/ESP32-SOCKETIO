@@ -58,7 +58,7 @@ using namespace ace_button;
 
 //rgb led variables
 #include <FastLED.h>
-#define WS2811PIN        5
+#define WS2812PIN        5
 #define NUMPIXELS 2
 #define PIXELUPDATETIME 30
 #define PIXELUPDATETIMELONG 5000

@@ -7,7 +7,7 @@ void setupPixels() {
   value[USERLED] = 0;
   value[REMOTELED] = 0;
 
-  FastLED.addLeds<WS2811, WS2811PIN, RGB>(leds, NUMPIXELS);
+  FastLED.addLeds<WS2812, WS2812PIN, RGB>(leds, NUMPIXELS);
   fill_solid(leds, NUMPIXELS, CRGB(0, 0, 0));
   FastLED.show();
   delay(1000);
@@ -35,12 +35,15 @@ void rgbLedHandler() {
       leds[REMOTELED] = CHSV(hue[REMOTELED], saturation[REMOTELED], value[REMOTELED]);
       FastLED.show();
     }
+    //long fade on remote led
     longFadeHandler();
   }
+  //updating every 5 seconds to make sure the leds dont lose their colours
   if (millisCheck - prevlongPixelMillis > PIXELUPDATETIMELONG) {
     prevlongPixelMillis = millisCheck;
     FastLED.show();
   }
+  //short fade on remote led receive or user led trigger
   fadeRGBHandler();
 }
 

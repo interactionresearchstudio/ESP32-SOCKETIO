@@ -40,6 +40,8 @@ void socketIO_msg(const char * payload, size_t length) {
     // TODO - Run light touch
     hue[REMOTELED] = (uint8_t)data_hue;
     ledChanged[REMOTELED] = true;
+   //added to enable reset of fading mid fade
+    isFadingRGB[REMOTELED] = false;
     fadeRGB(REMOTELED);
     startLongFade();
   }
