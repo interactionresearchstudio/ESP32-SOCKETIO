@@ -8,6 +8,6 @@ jobs:
     steps:
     - name: Hello world action step
       id: hello
-      uses: interactionresearchstudio/YoYoMachines-FirmwareCompiler@v0.1
+      uses: interactionresearchstudio/YoYoMachines-FirmwareCompiler@v0.2
       with:
         repo-name: 'ESP32-SOCKETIO'
