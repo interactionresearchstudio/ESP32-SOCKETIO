@@ -16,6 +16,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          path: ESP32-SOCKETIO
 
       - name: Setup Arduino CLI
         uses: arduino/setup-arduino-cli@v1.0.0
@@ -60,4 +62,4 @@ jobs:
         run: |
           mkdir build
           echo "Compiling ${{github.repository}}..."
-          arduino-cli compile -v -b esp32:esp32:esp32 --output-dir build ${{github.repository}}
+          arduino-cli compile -v -b esp32:esp32:esp32 --output-dir build ESP32-SOCKETIO
