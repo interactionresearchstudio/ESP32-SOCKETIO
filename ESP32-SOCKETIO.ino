@@ -135,7 +135,7 @@ class CapacitiveConfig: public ButtonConfig {
     }
 };
 
-#define TOUCH_THRESHOLD 30
+#define TOUCH_THRESHOLD 60
 #define LONG_TOUCH 1500
 CapacitiveConfig touchConfig(CAPTOUCH, TOUCH_THRESHOLD);
 AceButton buttonTouch(&touchConfig);
