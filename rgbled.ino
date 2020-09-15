@@ -12,6 +12,8 @@ void setupPixels() {
   FastLED.show();
   delay(1000);
 
+  blinkRGB();
+
 }
 
 void rgbLedHandler() {
@@ -62,10 +64,12 @@ uint16_t getUserHue() {
 
 
 void blinkRGB() {
-  leds[0] = CHSV(hue[USERLED], 0, 0);
+  leds[0] = CHSV(1, 255, 255);
+  leds[1] = CHSV(127, 255, 255);
   FastLED.show();
   delay(100);
-  leds[0] = CHSV(hue[USERLED], saturation[USERLED], value[USERLED]);
+  leds[0] = CHSV(1, 0, 0);
+  leds[1] = CHSV(127, 0, 0);
   FastLED.show();
 }
 
