@@ -36,7 +36,10 @@ jobs:
         uses: actions/checkout@master
         with:
           repository: me-no-dev/ESPAsyncWebServer
-        run: mv ESPAsyncWebServer Arduino/libraries/ESPAsyncWebServer
+
+      - name: Move libs to Arduino directory
+        run: |
+          cp ESPAsyncWebServer Arduino/libraries/ESPAsyncWebServer
 
       #- name: Checkout AsyncTCP
       #  uses: actions/checkout@master
