@@ -56,5 +56,8 @@ jobs:
           mv AsyncTCP /home/runner/Arduino/libraries/AsyncTCP
           mv SocketIoClient /home/runner/Arduino/libraries/SocketIoClient
 
-      - name: Name installed libraries
-        run: arduino-cli lib list
+      - name: Compile
+        run: |
+          mkdir build
+          echo "Compiling ${{github.repository}}..."
+          arduino-cli compile -v -b esp32:esp32:esp32 --output-dir build ${{github.repository}}
