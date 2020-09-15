@@ -1,5 +1,5 @@
 //#define DEV
-#define STAGING
+//#define STAGING
 
 #define EXTERNAL_BUTTON 23
 #define CAPTOUCH T0
@@ -209,7 +209,7 @@ void setup() {
     //connect to router to talk to server
     digitalWrite(LED_BUILTIN, 0);
     connectToWifi(wifiCredentials);
-    checkForUpdate();
+    //checkForUpdate();
     setupSocketIOEvents();
     currentSetupStatus = setup_finished;
     Serial.println("setup complete");
