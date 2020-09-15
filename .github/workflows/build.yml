@@ -73,7 +73,7 @@ jobs:
           arduino-cli compile -v -b esp32:esp32:esp32 --output-dir build ESP32-SOCKETIO
 
       - name: Upload binaries
-      - uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v2
         with:
           name: build
           path: build/
