@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@master
+        uses: actions/checkout@v2
 
       - name: Setup Arduino CLI
         uses: arduino/setup-arduino-cli@v1.0.0
@@ -33,29 +33,28 @@ jobs:
           arduino-cli lib install AceButton
 
       - name: Checkout ESPAsyncWebServer
-        uses: actions/checkout@master
+        uses: actions/checkout@v2
         with:
           repository: me-no-dev/ESPAsyncWebServer
+          path: ESPAsyncWebServer
+
+      - name: Checkout AsyncTCP
+        uses: actions/checkout@v2
+        with:
+          repository: me-no-dev/AsyncTCP
+          path: AsyncTCP
+
+      - name: Checkout SocketIoClient
+        uses: actions/checkout@v2
+        with:
+          repository: timum-viw/socket.io-client
+          path: SocketIoClient
 
       - name: Move libs to Arduino directory
         run: |
           cp ESPAsyncWebServer Arduino/libraries/ESPAsyncWebServer
-
-      #- name: Checkout AsyncTCP
-      #  uses: actions/checkout@master
-      #  with:
-      #    repository: me-no-dev/AsyncTCP
-#
-#      - name: Checkout SocketIoClient
-#        uses: actions/checkout@master
-#        with:
-#          repository: timum-viw/socket.io-client
-
-#      - name: Move libs to Arduino directory
-#        run: |
-#          cp ESPAsyncWebServer Arduino/libraries/ESPAsyncWebServer
-#          cp AsyncTCP Arduino/libraries/AsyncTCP
-#          cp SocketIoClient Arduino/libraries/SocketIoClient
+          cp AsyncTCP Arduino/libraries/AsyncTCP
+          cp SocketIoClient Arduino/libraries/SocketIoClient
 
       - name: Name installed libraries
         run: arduino-cli lib list
