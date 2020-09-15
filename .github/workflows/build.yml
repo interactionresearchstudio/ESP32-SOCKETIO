@@ -22,6 +22,14 @@ jobs:
       - name: Setup Arduino CLI
         uses: arduino/setup-arduino-cli@v1.0.0
 
+      - name: Install Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: '3.7.9'
+      - name: Install requirements
+        run: |
+          pip install pyserial
+
       - name: Install platform
         run: |
           arduino-cli core update-index --additional-urls https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
@@ -63,3 +71,9 @@ jobs:
           mkdir build
           echo "Compiling ${{github.repository}}..."
           arduino-cli compile -v -b esp32:esp32:esp32 --output-dir build ESP32-SOCKETIO
+
+      - name: Upload binaries
+      - uses: actions/upload-artifact@v2
+        with:
+          name: build
+          path: build/
