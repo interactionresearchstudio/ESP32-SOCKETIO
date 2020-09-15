@@ -10,29 +10,27 @@ on: push
 # started depends on how many configurations the matrix
 # will produce.
 jobs:
-  # This is the platform GitHub will use to run our workflow, we
-  # pick Windows for no particular reason.
-  runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
 
-  # This is the list of steps this job will run.
-  steps:
-    - name: Checkout
-      uses: actions/checkout@master
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
 
-    - name: Setup Arduino CLI
-      uses: arduino/setup-arduino-cli@v1.0.0
+      - name: Setup Arduino CLI
+        uses: arduino/setup-arduino-cli@v1.0.0
 
-    - name: Install platform
-      run: |
-        arduino-cli core update-index --additional-urls https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
-        arduino-cli core install esp32:esp32 --additional-urls https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+      - name: Install platform
+        run: |
+          arduino-cli core update-index --additional-urls https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+          arduino-cli core install esp32:esp32 --additional-urls https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
 
-    - name: Install libraries
-      run: |
-        arduino-cli lib install FastLED
-        arduino-cli lib install WebSockets
-        arduino-cli lib install ArduinoJson
-        arduino-cli lib install AceButton
+      - name: Install libraries
+        run: |
+          arduino-cli lib install FastLED
+          arduino-cli lib install WebSockets
+          arduino-cli lib install ArduinoJson
+          arduino-cli lib install AceButton
 
-    - name: Get libs folder
-      run: find / -name "libraries" #arduino-cli compile --fqbn ${{ matrix.fqbn }} ./blink
+      - name: Get libs folder
+        run: find / -name "libraries" #arduino-cli compile --fqbn ${{ matrix.fqbn }} ./blink
