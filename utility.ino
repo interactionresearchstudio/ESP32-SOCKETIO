@@ -10,7 +10,10 @@ void setupPins() {
   buttonConfigBuiltIn->setLongPressDelay(longButtonPressDelay);
 
   ButtonConfig* buttonExternalConfig = buttonExternal.getButtonConfig();
-  buttonExternalConfig->setEventHandler(handleButtonEvent);
+  buttonExternalConfig->setEventHandler(handleButtonEventExternal);
+  buttonExternalConfig->setFeature(ButtonConfig::kFeatureClick);
+  buttonExternalConfig->setFeature(ButtonConfig::kFeatureLongPress);
+  buttonExternalConfig->setLongPressDelay(LONG_TOUCH);
 
   touchConfig.setFeature(ButtonConfig::kFeatureClick);
   touchConfig.setFeature(ButtonConfig::kFeatureLongPress);
@@ -66,6 +69,34 @@ void handleButtonEvent(AceButton* button, uint8_t eventType, uint8_t buttonState
 #endif
       break;
     case AceButton::kEventRepeatPressed:
+      break;
+  }
+}
+
+// button functions
+void handleButtonEventExternal(AceButton* button, uint8_t eventType, uint8_t buttonState) {
+  Serial.println(button->getId());
+
+  switch (eventType) {
+    case AceButton::kEventPressed:
+      Serial.println("TOUCH: pressed");
+      break;
+    case AceButton::kEventLongPressed:
+      Serial.println("TOUCH: Long pressed");
+      isSelectingColour = true;
+      // TODO also hold the LED at the colour for a little bit
+      break;
+    case AceButton::kEventReleased:
+      Serial.println("TOUCH: released");
+      isSelectingColour = false;
+      ledChanged[USERLED] = true;
+      fadeRGB(USERLED);
+      break;
+    case AceButton::kEventClicked:
+      Serial.println("TOUCH: clicked");
+      ledChanged[USERLED] = true;
+      fadeRGB(USERLED);
+      socketIO_sendColour();
       break;
   }
 }
