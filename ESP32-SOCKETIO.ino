@@ -6,7 +6,7 @@
 #define LED_BUILTIN 2
 #define LED_BUILTIN_ON HIGH
 
-int BUTTON_BUILTIN = 0;
+int BUTTON_BUILTIN =  0;
 
 bool disconnected = false;
 
