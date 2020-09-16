@@ -107,7 +107,10 @@ class CaptiveRequestHandler : public AsyncWebHandler {
       String remote_pass = json["remote_pass"].as<String>();
       String remote_mac = json["remote_mac"].as<String>();
 
-      if (remote_mac != "") addToMacAddressJSON(remote_mac);
+      if (remote_mac != "") {
+        addToMacAddressJSON(remote_mac);
+        readyToReset = true;
+      }
 
       if (remote_pass != "" && remote_ssid != "" && local_ssid != "" && local_pass != "") {
         local_ssid = checkSsidForSpelling(local_ssid);
@@ -115,13 +118,15 @@ class CaptiveRequestHandler : public AsyncWebHandler {
         addToWiFiJSON(local_ssid, local_pass);
         addToWiFiJSON(remote_ssid, remote_pass);
         sendWifiCredentials();
-        socket_server.textAll("RESTART");
-        softReset();
+        readyToReset = true;
       }
       else if (local_pass != "" && local_ssid != "" && remote_ssid == "" && remote_pass == "") {
         local_ssid = checkSsidForSpelling(local_ssid);
         addToWiFiJSON(local_ssid, local_pass);
         sendWifiCredentials();
+        readyToReset = true;
+      }
+      if (readyToReset) {
         socket_server.textAll("RESTART");
         softReset();
       }

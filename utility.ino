@@ -6,11 +6,9 @@ void setupPins() {
 
   ButtonConfig* buttonConfigBuiltIn = buttonBuiltIn.getButtonConfig();
   buttonConfigBuiltIn->setEventHandler(handleButtonEvent);
+  buttonConfigBuiltIn->setFeature(ButtonConfig::kFeatureClick);
   buttonConfigBuiltIn->setFeature(ButtonConfig::kFeatureLongPress);
-  buttonConfigBuiltIn->setLongPressDelay(longButtonPressDelay);
-
-  ButtonConfig* buttonExternalConfig = buttonExternal.getButtonConfig();
-  buttonExternalConfig->setEventHandler(handleButtonEvent);
+  buttonConfigBuiltIn->setLongPressDelay(LONG_TOUCH);
 
   touchConfig.setFeature(ButtonConfig::kFeatureClick);
   touchConfig.setFeature(ButtonConfig::kFeatureLongPress);
@@ -52,20 +50,48 @@ void blinkOnConnect() {
 
 // button functions
 void handleButtonEvent(AceButton* button, uint8_t eventType, uint8_t buttonState) {
-  Serial.println(button->getId());
-
-  switch (eventType) {
-    case AceButton::kEventPressed:
-      break;
-    case AceButton::kEventReleased:
-      if (currentSetupStatus == setup_finished) socketIO_sendButtonPress();
-      break;
-    case AceButton::kEventLongPressed:
+  Serial.print("ID IS: ");
+  Serial.println(button->getPin());
+  switch (button->getPin()) {
+    case 0:
+      switch (eventType) {
+        case AceButton::kEventPressed:
+          break;
+        case AceButton::kEventReleased:
+          if (currentSetupStatus == setup_finished) socketIO_sendButtonPress();
+          break;
+        case AceButton::kEventLongPressed:
 #ifdef DEV
-      factoryReset();
+          factoryReset();
 #endif
+          break;
+        case AceButton::kEventRepeatPressed:
+          break;
+      }
       break;
-    case AceButton::kEventRepeatPressed:
+    case EXTERNAL_BUTTON:
+      switch (eventType) {
+        case AceButton::kEventPressed:
+          Serial.println("TOUCH: pressed");
+          break;
+        case AceButton::kEventLongPressed:
+          Serial.println("TOUCH: Long pressed");
+          isSelectingColour = true;
+          // TODO also hold the LED at the colour for a little bit
+          break;
+        case AceButton::kEventReleased:
+          Serial.println("TOUCH: released");
+          isSelectingColour = false;
+          ledChanged[USERLED] = true;
+          fadeRGB(USERLED);
+          break;
+        case AceButton::kEventClicked:
+          Serial.println("TOUCH: clicked");
+          ledChanged[USERLED] = true;
+          fadeRGB(USERLED);
+          socketIO_sendColour();
+          break;
+      }
       break;
   }
 }

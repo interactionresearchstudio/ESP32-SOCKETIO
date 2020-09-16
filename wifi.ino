@@ -21,8 +21,8 @@ boolean scanAndConnectToLocalSCADS() {
       Serial.println((WiFi.encryptionType(i) == WIFI_AUTH_OPEN) ? " " : "*");
       delay(10);
       scads_ssid = WiFi.SSID(i);
-      if (scads_ssid.indexOf("SCADS-") > -1) {
-        Serial.println("Found SCAD");
+      if (scads_ssid.indexOf("Yo-Yo-") > -1) {
+        Serial.println("Found YOYO");
         foundLocalSCADS = true;
         wifiMulti.addAP(scads_ssid.c_str(), scads_pass.c_str());
         while ((wifiMulti.run() != WL_CONNECTED)) {

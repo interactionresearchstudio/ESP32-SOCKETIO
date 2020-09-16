@@ -7,9 +7,10 @@
 #define LED_BUILTIN 2
 #define LED_BUILTIN_ON HIGH
 
-int BUTTON_BUILTIN = 0;
+int BUTTON_BUILTIN =  0;
 
 bool disconnected = false;
+bool readyToReset = false;
 
 unsigned long wificheckMillis;
 unsigned long wifiCheckTime = 5000;
@@ -137,7 +138,7 @@ class CapacitiveConfig: public ButtonConfig {
     }
 };
 
-#define TOUCH_THRESHOLD 30
+#define TOUCH_THRESHOLD 60
 #define LONG_TOUCH 1500
 CapacitiveConfig touchConfig(CAPTOUCH, TOUCH_THRESHOLD);
 AceButton buttonTouch(&touchConfig);
