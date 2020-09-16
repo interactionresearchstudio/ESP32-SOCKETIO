@@ -12,7 +12,6 @@ on: push
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -77,3 +76,37 @@ jobs:
         with:
           name: build
           path: build/
+
+  build_data_folder:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          path: ESP32-SOCKETIO
+
+      - name: Checkout mkspiffs
+        uses: actions/checkout@v2
+        with:
+          repository: igrr/mkspiffs
+          path: mkspiffs
+
+      - name: Install build tools
+        run: |
+          apt-get update
+          apt-get install -y make gcc build-essential
+
+      - name: Build mkspiffs
+        run: |
+          cd mkspiffs && git submodule update --init && make dist
+          cd .. && mkspiffs/./mkspiffs --version
+
+      - name: Create spiffs binary
+        run: |
+          mkspiffs/./mkspiffs -c ESP32-SOCKETIO/data -b 4096 -p 256 -s 0x100000 spiffs.bin
+
+      - name: Upload spiffs.bin
+        uses: actions/upload-artifact@v2
+        with:
+          name: build/spiffs.bin
+          path: spiffs.bin
