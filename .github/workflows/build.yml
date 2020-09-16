@@ -71,20 +71,6 @@ jobs:
           echo "Compiling ${{github.repository}}..."
           arduino-cli compile -v -b esp32:esp32:esp32 --output-dir build ESP32-SOCKETIO
 
-      - name: Upload binaries
-        uses: actions/upload-artifact@v2
-        with:
-          name: build
-          path: build/
-
-  build_data_folder:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          path: ESP32-SOCKETIO
-
       - name: Checkout mkspiffs
         uses: actions/checkout@v2
         with:
@@ -103,10 +89,10 @@ jobs:
 
       - name: Create spiffs binary
         run: |
-          mkspiffs/./mkspiffs -c ESP32-SOCKETIO/data -b 4096 -p 256 -s 0x100000 spiffs.bin
+          mkspiffs/./mkspiffs -c ESP32-SOCKETIO/data -b 4096 -p 256 -s 0x100000 build/spiffs.bin
 
-      - name: Upload spiffs.bin
+      - name: Upload binaries
         uses: actions/upload-artifact@v2
         with:
-          name: build/spiffs.bin
-          path: spiffs.bin
+          name: build
+          path: build/
