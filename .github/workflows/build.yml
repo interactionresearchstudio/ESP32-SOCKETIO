@@ -93,8 +93,8 @@ jobs:
 
       - name: Install build tools
         run: |
-          apt-get update
-          apt-get install -y make gcc build-essential
+          sudo apt-get update
+          sudo apt-get install -y make gcc build-essential
 
       - name: Build mkspiffs
         run: |
