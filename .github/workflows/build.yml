@@ -91,7 +91,21 @@ jobs:
         run: |
           mkspiffs/./mkspiffs -c ESP32-SOCKETIO/data -b 4096 -p 256 -s 0x100000 build/spiffs.bin
 
-      - name: Upload binaries
+      - name: Checkout esp_binary_merger
+        uses: actions/checkout@v2
+        with:
+          repository: vtunr/esp32_binary_merger
+          path: esp32_binary_merger
+
+      - name: Merge binaries
+        run: |
+          python esp32_binary_merger/merge_bin_esp.py \
+            --output_name app-combined.bin \
+            --bin_path ESP32_SOCKETIO/helpers/bootloader_qio_80m.bin build/ESP32_SOCKETIO.ino.partitions.bin build/ESP32_SOCKETIO.ino.bin build/spiffs.bin \
+            --bin_address 0x1000 0x8000 0x10000 0x290000
+          mv output/app-combined.bin build/app-combined.bin
+
+      - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
           name: build
