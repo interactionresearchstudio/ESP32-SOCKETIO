@@ -105,6 +105,7 @@ jobs:
             --bin_path ESP32-SOCKETIO/helpers/bootloader_qio_80m.bin build/ESP32-SOCKETIO.ino.partitions.bin build/ESP32-SOCKETIO.ino.bin build/spiffs.bin \
             --bin_address 0x1000 0x8000 0x10000 0x290000
           mv output/app-combined.bin build/app-combined.bin
+          mv build/ESP32-SOCKETIO.ino.bin build/app.bin
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
