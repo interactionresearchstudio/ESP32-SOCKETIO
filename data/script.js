@@ -25,19 +25,19 @@ function configure(json) {
         var remoteMac = document.getElementById("remoteMacForm");
         remoteMac.style.display = "block";
     } else if(json.local_paired_status == "localSetup"){
-        //Show local and remote wifi form
+        //Show local wifi form and remote wifi form
         var remoteWifi = document.getElementById("remoteWifiForm");
         remoteWifi.style.display = "block";
         //var remoteMacInput = document.getElementById("remoteMacForm-input");
         //remoteMacInput.style.display = "none";
         var remoteMac = document.getElementById("remoteMacForm");
-        remoteMac.style.display = "block";
+        remoteMac.style.display = "none";
     } else if(json.local_paired_status == "pairedSetup"){
         //just show local wifi details
         var remoteWifi = document.getElementById("remoteWifiForm");
         remoteWifi.style.display = "none";
         var remoteMac = document.getElementById("remoteMacForm");
-        remoteMac.style.display = "block";
+        remoteMac.style.display = "none";
         //var remoteMacInput = document.getElementById("remoteMacForm-input");
         //remoteMacInput.style.display = "none";
     } 
