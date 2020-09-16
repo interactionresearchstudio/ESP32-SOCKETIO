@@ -1,34 +1,114 @@
-name: Build
+# This is the name of the workflow, visible on GitHub UI.
+name: build
+
+# Here we tell GitHub to run the workflow when a commit
+# is pushed or a Pull Request is opened.
 on: push
+
+# This is the list of jobs that will be run concurrently.
+# Since we use a build matrix, the actual number of jobs
+# started depends on how many configurations the matrix
+# will produce.
 jobs:
   build:
-    name: Build for ESP32
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          path: ESP32-SOCKETIO
 
-    - name: Checkout ESPAsyncWebServer
-      uses: actions/checkout@v2
-      with:
-        repository: me-no-dev/ESPAsyncWebServer
-        ref: master
-        path: CustomESPAsyncWebServer
+      - name: Setup Arduino CLI
+        uses: arduino/setup-arduino-cli@v1.0.0
 
-    - name: Checkout AsyncTCP
-      uses: actions/checkout@v2
-      with:
-        repository: me-no-dev/AsyncTCP
-        ref: master
-        path: CustomAsyncTCP
+      - name: Install Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: '2.7'
 
-    - name: Compile
-      uses: ArminJo/arduino-test-compile@v2
-      with:
-        arduino-board-fqbn: esp32:esp32:esp32
-        platform-url: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
-        required-libraries: AceButton, WebSockets, SocketIoClient, ESPAsyncWebServer, AsyncTCP
+      - name: Install requirements
+        run: |
+          pip install pyserial
 
-    - name: See dist directory
-      run: ls
+      - name: Install platform
+        run: |
+          arduino-cli core update-index --additional-urls https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+          arduino-cli core install esp32:esp32 --additional-urls https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+
+      - name: Install libraries
+        run: |
+          arduino-cli lib install FastLED
+          arduino-cli lib install WebSockets
+          arduino-cli lib install ArduinoJson
+          arduino-cli lib install AceButton
+
+      - name: Checkout ESPAsyncWebServer
+        uses: actions/checkout@v2
+        with:
+          repository: me-no-dev/ESPAsyncWebServer
+          path: ESPAsyncWebServer
+
+      - name: Checkout AsyncTCP
+        uses: actions/checkout@v2
+        with:
+          repository: me-no-dev/AsyncTCP
+          path: AsyncTCP
+
+      - name: Checkout SocketIoClient
+        uses: actions/checkout@v2
+        with:
+          repository: timum-viw/socket.io-client
+          path: SocketIoClient
+
+      - name: Move libs to Arduino directory
+        run: |
+          mv ESPAsyncWebServer /home/runner/Arduino/libraries/ESPAsyncWebServer
+          mv AsyncTCP /home/runner/Arduino/libraries/AsyncTCP
+          mv SocketIoClient /home/runner/Arduino/libraries/SocketIoClient
+
+      - name: Compile
+        run: |
+          mkdir build
+          echo "Compiling ${{github.repository}}..."
+          arduino-cli compile -v -b esp32:esp32:esp32 --output-dir build ESP32-SOCKETIO
+
+      - name: Checkout mkspiffs
+        uses: actions/checkout@v2
+        with:
+          repository: igrr/mkspiffs
+          path: mkspiffs
+
+      - name: Install build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y make gcc build-essential
+
+      - name: Build mkspiffs
+        run: |
+          cd mkspiffs && git submodule update --init && make dist
+          cd .. && mkspiffs/./mkspiffs --version
+
+      - name: Create spiffs binary
+        run: |
+          mkspiffs/./mkspiffs -c ESP32-SOCKETIO/data -b 4096 -p 256 -s 0x100000 build/spiffs.bin
+
+      - name: Checkout esp_binary_merger
+        uses: actions/checkout@v2
+        with:
+          repository: vtunr/esp32_binary_merger
+          path: esp32_binary_merger
+
+      - name: Merge binaries
+        run: |
+          python esp32_binary_merger/merge_bin_esp.py \
+            --output_name app-combined.bin \
+            --bin_path ESP32-SOCKETIO/helpers/bootloader_qio_80m.bin build/ESP32-SOCKETIO.ino.partitions.bin build/ESP32-SOCKETIO.ino.bin build/spiffs.bin \
+            --bin_address 0x1000 0x8000 0x10000 0x290000
+          mv output/app-combined.bin build/app-combined.bin
+          mv build/ESP32-SOCKETIO.ino.bin build/app.bin
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: build
+          path: build/

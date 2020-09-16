@@ -1,4 +1,5 @@
 //#define DEV
+//#define STAGING
 
 #define EXTERNAL_BUTTON 23
 #define CAPTOUCH T0
@@ -30,7 +31,8 @@ enum SETUP_STATUS {
 };
 int currentSetupStatus = setup_pending;
 
-#define VERSION "v0.3"
+#define PROJECT_SLUG "ESP32-SOCKETIO"
+#define VERSION "v0.2"
 #define ESP32set
 #define WIFICONNECTTIMEOUT 60000
 
@@ -67,13 +69,13 @@ using namespace ace_button;
 #define REMOTELED 1
 #define RGBLEDPWMSTART 120
 #define LONGFADEMINUTESMAX 720
-#define LONGFADECHECKMILLIS 60000 
+#define LONGFADECHECKMILLIS 60000
 unsigned long  prevLongFadeVal = 0;
 uint8_t hue[NUMPIXELS];
 uint8_t saturation[NUMPIXELS];
 uint8_t value[NUMPIXELS];
 uint8_t prevRemoteSat;
-bool ledChanged[NUMPIXELS] = {false,false};
+bool ledChanged[NUMPIXELS] = {false, false};
 unsigned long prevPixelMillis;
 bool isLongFade = false;
 unsigned long prevlongPixelMillis;
@@ -81,8 +83,8 @@ unsigned long longFadeMinutes;
 unsigned long prevLongFadeMillis;
 bool isRemoteLedFading = false;
 CRGB leds[NUMPIXELS];
-bool readyToFadeRGB[NUMPIXELS] = {false,false};
-bool isFadingRGB[NUMPIXELS] = {false,false};
+bool readyToFadeRGB[NUMPIXELS] = {false, false};
+bool isFadingRGB[NUMPIXELS] = {false, false};
 unsigned long fadeTimeRGB[NUMPIXELS];
 #define RGBFADEMILLIS 6
 
@@ -208,6 +210,7 @@ void setup() {
     //connect to router to talk to server
     digitalWrite(LED_BUILTIN, 0);
     connectToWifi(wifiCredentials);
+    //checkForUpdate();
     setupSocketIOEvents();
     currentSetupStatus = setup_finished;
     Serial.println("setup complete");
