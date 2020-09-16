@@ -9,6 +9,7 @@
 int BUTTON_BUILTIN =  0;
 
 bool disconnected = false;
+bool readyToReset = false;
 
 unsigned long wificheckMillis;
 unsigned long wifiCheckTime = 5000;

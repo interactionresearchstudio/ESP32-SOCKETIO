@@ -131,9 +131,20 @@ void addToWiFiJSON(String newSSID, String newPassword) {
     inList = false;
     for ( int i = 0; i < ssids.size(); i++) {
       if (ssids[i] == newSSID) {
-        inList = true;
         Serial.println("wifi credentials already in list");
-        break;
+        if (passwords[i] == newPassword) {
+          inList = true;
+          Serial.println("password same too");
+          break;
+        } else {
+          inList = true;
+          Serial.println("password will be updated");
+          passwords[i] = newPassword;
+          wifilist = "";
+          serializeJson(addresses, wifilist);
+          preferences.putString("wifi", wifilist);
+          break;
+        }
       }
     }
     if (inList == false) {
@@ -165,7 +176,7 @@ void addToWiFiJSON(String newSSID, String newPassword) {
 
 String getRemoteMacAddress(int clientID) {
   String remoteMacAddress = "";
-  
+
   //Return a specific mac address from the JSON array
   String _macAddressJson = getJSONMac();
   const size_t capacity = JSON_ARRAY_SIZE(6) + JSON_OBJECT_SIZE(1) + 10;
@@ -173,19 +184,19 @@ String getRemoteMacAddress(int clientID) {
   deserializeJson(addresses, _macAddressJson);
   JsonArray macs = addresses["mac"];
 
-  if(macs.size() > clientID) {
+  if (macs.size() > clientID) {
     remoteMacAddress = macs[clientID].as<String>();
   }
-  
-  return(remoteMacAddress);
+
+  return (remoteMacAddress);
 }
 
 int getNumberOfMacAddresses() {
   int numberOfMacAddresses = 0;
-  
+
   //Returns the number of mac address in JSON array
   preferences.begin("scads", false);
-    String macCredentials = preferences.getString("mac", "");
+  String macCredentials = preferences.getString("mac", "");
   preferences.end();
 
   if (macCredentials != "") {
@@ -195,7 +206,7 @@ int getNumberOfMacAddresses() {
     numberOfMacAddresses = addresses["mac"].size();
   }
 
-  return(numberOfMacAddresses);
+  return (numberOfMacAddresses);
 }
 
 String getScanAsJsonString() {
