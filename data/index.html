@@ -18,33 +18,37 @@
   <body onload=init() class="text-center">
     <form class="yo-yo-form">
       <img src="logo_yoyo.png" alt="" width="200" height="96">
-      <div class="lead" id="macForm">
-        <p>Your Yo-Yo Code is:</p>
-        <p id="local-scad-code">XXXXXXXXX</p>
-      </div>
-  
-      <div class="mb-4" id="remoteMacForm">
-        <input id="remote-scad-code-input" class="form-control" inputmode="numeric" pattern="[0-9 ]+" type="text" placeholder="Remote Yo-Yo Code">
-      </div>
-  
-      <div class="mb-4" id="localWifiForm">
-        <div class="input-group mb-3">
-          <input id="local_ssid" class="form-control" type="text" placeholder="Network Name" list="networks-list">
-          <datalist id=networks-list>
-            <select id=networks-list-select></select>
-          </datalist>
+      <div id="config">
+        <div class="lead" id="macForm">
+          <p>Your Yo-Yo Code is:</p>
+          <p id="local-scad-code">XXXX-XXXXX</p>
         </div>
+    
+        <div class="mb-4" id="remoteMacForm">
+          <input id="remote-scad-code-input" class="form-control" inputmode="numeric" pattern="[0-9 ]+" type="text" placeholder="Remote Yo-Yo Code">
+        </div>
+    
+        <div class="mb-4" id="localWifiForm">
+          <div class="input-group mb-3">
+            <input id="local_ssid" class="form-control" type="text" placeholder="Network Name" list="networks-list">
+            <datalist id=networks-list>
+              <select id=networks-list-select></select>
+            </datalist>
+          </div>
 
-        <input id="local_pass" class="form-control" placeholder="Password" type="password">
+          <input id="local_pass" class="form-control" placeholder="Password" type="password">
+        </div>
+    
+        <div class="mb-4" id="remoteWifiForm">
+          <p>Optionally set the remote network:</p>
+          <input id="remote_ssid" class="form-control" placeholder="Network Name">
+          <input id="remote_pass" class="form-control" placeholder="Password" type="password">
+        </div>
+    
+        <button class="btn btn-lg btn-primary btn-block" id="save-button" type="submit">Save</button>
       </div>
-  
-      <div class="mb-4" id="remoteWifiForm">
-        <p>Optionally set the remote network:</p>
-        <input id="remote_ssid" class="form-control" placeholder="Network Name">
-        <input id="remote_pass" class="form-control" placeholder="Password" type="password">
-      </div>
-  
-      <button class="btn btn-lg btn-primary btn-block" id="save-button" type="submit">Save</button>
+
+      <div class="mb-4" id="result"></div>
       <p class="mt-5 mb-3 text-muted">Interaction Research Studio 2020</p>
     </form>
   </body>

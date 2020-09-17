@@ -1,5 +1,7 @@
 function init() {
+    $('#config').hide();
     $.getJSON('/credentials', function (json) {
+        $('#config').show();
         configure(json);
     });
 }
@@ -8,38 +10,27 @@ function configure(json) {
     console.log(json);
 
     $('#save-button').click(onSaveButtonClicked);
-    $('#save-button').click(onSaveButtonClicked);
 
     $('#local_ssid').keypress(onKeyPressed);
     $('#local_pass').keypress(onKeyPressed);
 
     $('#local_ssid').text(json.local_ssid);
     //TODO: use the password length to display
-     $('#remote-scad-code').text(formatScadCode(json.remote_mac));
+     if(json.remote_mac != "") $('#remote-scad-code-input').attr('value', formatScadCode(json.remote_mac));
      $('#local-scad-code').text(formatScadCode(json.local_mac));
 
     if(json.local_paired_status == "remoteSetup") {
         //Show local wifi form, local and remote IDs
-        var remoteWifi = document.getElementById("remoteWifiForm");
-        remoteWifi.style.display = "none";
-        var remoteMac = document.getElementById("remoteMacForm");
-        remoteMac.style.display = "block";
+        $('#remoteWifiForm').hide();
+        $('#remoteMacForm').show();
     } else if(json.local_paired_status == "localSetup"){
         //Show local wifi form and remote wifi form
-        var remoteWifi = document.getElementById("remoteWifiForm");
-        remoteWifi.style.display = "block";
-        //var remoteMacInput = document.getElementById("remoteMacForm-input");
-        //remoteMacInput.style.display = "none";
-        var remoteMac = document.getElementById("remoteMacForm");
-        remoteMac.style.display = "none";
+        $('#remoteWifiForm').show();
+        $('#remoteMacForm').hide();
     } else if(json.local_paired_status == "pairedSetup"){
         //just show local wifi details
-        var remoteWifi = document.getElementById("remoteWifiForm");
-        remoteWifi.style.display = "none";
-        var remoteMac = document.getElementById("remoteMacForm");
-        remoteMac.style.display = "none";
-        //var remoteMacInput = document.getElementById("remoteMacForm-input");
-        //remoteMacInput.style.display = "none";
+        $('#remoteWifiForm').hide();
+        $('#remoteMacForm').show();
     } 
 
     $('#local_ssid').attr('disabled', true);
@@ -77,18 +68,25 @@ function onSaveButtonClicked() {
         remote_ssid: $('#remote_ssid').val(),
         remote_pass: $('#remote_pass').val()
     };
-    
-    console.log(data);
 
+    //NB dataType is 'text' otherwise json validation fails on Safari
     $.ajax({
         type: "POST",
         url: "/credentials",
         data: JSON.stringify(data),
-        dataType: 'json',
-        contentType: 'application/json; charset=utf-8'
-    }).done(function(response) {
-        // handle a successful response
-    }).fail(function(xhr, status, message) {
-        // handle a failure response
+        dataType: 'text',
+        contentType: 'application/json; charset=utf-8',
+        cache: false,
+        timeout: 15000,
+        async: false,
+        success: function(response, textStatus, jqXHR) {
+            console.log(response);
+            $('#config').hide();
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            console.log(jqXHR);
+            console.log(textStatus);
+            console.log(errorThrown);
+        }
     });
 }
