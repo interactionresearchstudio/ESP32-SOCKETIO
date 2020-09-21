@@ -16,25 +16,33 @@ function configure(json) {
 
     $('#local_ssid').text(json.local_ssid);
     //TODO: use the password length to display
-     if(json.remote_mac != "") $('#remote-scad-code-input').attr('value', formatScadCode(json.remote_mac));
-     $('#local-scad-code').text(formatScadCode(json.local_mac));
+    if(json.remote_mac != "") $('#remote-scad-code-input').attr('value', formatScadCode(json.remote_mac));
+    $('#local-scad-code').text(formatScadCode(json.local_mac));
 
-    if(json.local_paired_status == "remoteSetup") {
-        //Show local wifi form, local and remote IDs
-        $('#remoteWifiForm').hide();
-        $('#remoteMacForm').show();
-    } else if(json.local_paired_status == "localSetup"){
-        //Show local wifi form and remote wifi form
-        $('#remoteWifiForm').show();
-        $('#remoteMacForm').hide();
-    } else if(json.local_paired_status == "pairedSetup"){
-        //just show local wifi details
-        $('#remoteWifiForm').hide();
-        $('#remoteMacForm').show();
-    } 
+    configureDisplay(json.local_paired_status);
 
     $('#local_ssid').attr('disabled', true);
     populateNetworksList();
+}
+
+function configureDisplay(local_paired_status) {
+    switch(local_paired_status) {
+        case 'remoteSetup':
+            //Show local wifi form, local and remote IDs
+            $('#remoteWifiForm').hide();
+            $('#remoteMacForm').show();
+            break;
+        case 'localSetup':
+            //Show local wifi form and remote wifi form
+            $('#remoteWifiForm').show();
+            $('#remoteMacForm').hide();
+            break;
+        case 'pairedSetup':
+            //just show local wifi details
+            $('#remoteWifiForm').hide();
+            $('#remoteMacForm').show();
+            break;
+    }
 }
 
 function formatScadCode(code) {
