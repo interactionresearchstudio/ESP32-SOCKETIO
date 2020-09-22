@@ -72,26 +72,9 @@ jobs:
           echo "Compiling ${{github.repository}}..."
           arduino-cli compile -v -b esp32:esp32:esp32 --output-dir build ESP32-SOCKETIO
 
-      - name: Checkout mkspiffs
-        uses: actions/checkout@v2
-        with:
-          repository: igrr/mkspiffs
-          path: mkspiffs
-
-      - name: Install build tools
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y make gcc build-essential
-          find / -name "mkspiffs" 
-
-      - name: Build mkspiffs
-        run: |
-          cd mkspiffs && git submodule update --init && make dist
-          cd .. && mkspiffs/./mkspiffs --version
-
       - name: Create spiffs binary
         run: |
-          mkspiffs/./mkspiffs -c ESP32-SOCKETIO/data -b 4096 -p 256 -s 0x100000 build/spiffs.bin
+          /home/runner/.arduino15/packages/esp32/tools/mkspiffs/0.2.3/mkspiffs -c ESP32-SOCKETIO/data -b 4096 -p 256 -s 0x100000 build/spiffs.bin
 
       - name: Checkout esp_binary_merger
         uses: actions/checkout@v2
