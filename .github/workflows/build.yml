@@ -74,7 +74,7 @@ jobs:
 
       - name: Create spiffs binary
         run: |
-          /home/runner/.arduino15/packages/esp32/tools/mkspiffs/0.2.3/mkspiffs -c ESP32-SOCKETIO/data -b 4096 -p 256 -s 0x100000 build/spiffs.bin
+          /home/runner/.arduino15/packages/esp32/tools/mkspiffs/0.2.3/mkspiffs -c ESP32-SOCKETIO/data -b 4096 -p 256 -s 0x170000 build/spiffs.bin
 
       - name: Checkout esp_binary_merger
         uses: actions/checkout@v2
