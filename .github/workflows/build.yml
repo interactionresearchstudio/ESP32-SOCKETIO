@@ -90,7 +90,7 @@ jobs:
 
       - name: Create spiffs binary
         run: |
-          mkspiffs/./mkspiffs -c ESP32-SOCKETIO/data -b 4096 -p 256 -s 0x100000 build/spiffs.bin
+          mkspiffs/./mkspiffs -c ESP32-SOCKETIO/data -b 4096 -p 256 -s 0x290000 build/spiffs.bin
 
       - name: Checkout esp_binary_merger
         uses: actions/checkout@v2
