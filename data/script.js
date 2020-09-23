@@ -69,8 +69,9 @@ function populateNetworksList() {
     networks.empty();
 
     $.getJSON('/scan', function (json) {
+        networks.append('<option value="" disabled selected>Network Name</option>');
         $.each(json, function (key, entry) {
-            networks.append($('<option></option>').attr('value', entry.SSID));
+            networks.append($('<option></option>').attr('value', entry.SSID).text(entry.SSID));
         });
         $('#local_ssid').attr('disabled', false);
     });
@@ -78,7 +79,7 @@ function populateNetworksList() {
 
 function onSaveButtonClicked() {
     var data = {
-        local_ssid: $('#local_ssid').val(),
+        local_ssid: $('#networks-list-select').children("option:selected").val(),
         local_pass: $('#local_pass').val(),
         remote_mac: $('#remote-scad-code-input').val().replace(/\s/g,''),
         remote_ssid: $('#remote_ssid').val(),
