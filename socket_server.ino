@@ -2,7 +2,9 @@
 void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len) {
 
   if (type == WS_EVT_CONNECT) {
+    if(getNumberOfMacAddresses() < 2){
     currentPairedStatus = localSetup;
+    }
     Serial.println("Websocket client connection received");
     webSocketClientID = client->id();
     Serial.println(client->id());

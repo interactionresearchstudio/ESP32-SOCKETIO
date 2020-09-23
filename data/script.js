@@ -16,8 +16,13 @@ function configure(json) {
 
     $('#local_ssid').text(json.local_ssid);
     //TODO: use the password length to display
-    if(json.remote_mac != "") $('#remote-scad-code-input').attr('value', formatScadCode(json.remote_mac));
     $('#local-scad-code').text(formatScadCode(json.local_mac));
+    if (json.remote_mac != "") {
+        $('#remote-scad-code').text(formatScadCode(json.remote_mac));
+        $('#remote-scad-code-input').hide();
+    } else {
+        $('#remote-scad-text').hide();
+    }
 
     configureDisplay(json.local_paired_status);
 
@@ -28,19 +33,22 @@ function configure(json) {
 function configureDisplay(local_paired_status) {
     switch(local_paired_status) {
         case 'remoteSetup':
+            console.log("remote");
             //Show local wifi form, local and remote IDs
             $('#remoteWifiForm').hide();
             $('#remoteMacForm').show();
             break;
         case 'localSetup':
+            console.log("local");
             //Show local wifi form and remote wifi form
             $('#remoteWifiForm').show();
             $('#remoteMacForm').hide();
             break;
         case 'pairedSetup':
             //just show local wifi details
+            console.log("paired");
             $('#remoteWifiForm').hide();
-            $('#remoteMacForm').show();
+            $('#remoteMacForm').hide();
             break;
     }
 }
