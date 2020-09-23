@@ -1,5 +1,6 @@
 function init() {
     $('#config').hide();
+    $('#alert-text').hide();
     $.getJSON('/credentials', function (json) {
         $('#config').show();
         configure(json);
@@ -69,8 +70,9 @@ function populateNetworksList() {
     networks.empty();
 
     $.getJSON('/scan', function (json) {
+        networks.append('<option value="" disabled selected>Network Name</option>');
         $.each(json, function (key, entry) {
-            networks.append($('<option></option>').attr('value', entry.SSID));
+            networks.append($('<option></option>').attr('value', entry.SSID).text(entry.SSID));
         });
         $('#local_ssid').attr('disabled', false);
     });
@@ -78,7 +80,7 @@ function populateNetworksList() {
 
 function onSaveButtonClicked() {
     var data = {
-        local_ssid: $('#local_ssid').val(),
+        local_ssid: $('#networks-list-select').children("option:selected").val(),
         local_pass: $('#local_pass').val(),
         remote_mac: $('#remote-scad-code-input').val().replace(/\s/g,''),
         remote_ssid: $('#remote_ssid').val(),
@@ -98,11 +100,17 @@ function onSaveButtonClicked() {
         success: function(response, textStatus, jqXHR) {
             console.log(response);
             $('#config').hide();
+            $('#alert-text').show();
+            $('#alert-text').addClass('alert-success');
+            $('#alert-text').text('Done');
         },
         error: function (jqXHR, textStatus, errorThrown) {
             console.log(jqXHR);
             console.log(textStatus);
             console.log(errorThrown);
+            $('#alert-text').show();
+            $('#alert-text').addClass('alert-danger');
+            $('#alert-text').text('Error updating configuration!');
         }
     });
 }
