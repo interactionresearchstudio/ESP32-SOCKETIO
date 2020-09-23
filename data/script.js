@@ -1,5 +1,6 @@
 function init() {
     $('#config').hide();
+    $('#alert-text').hide();
     $.getJSON('/credentials', function (json) {
         $('#config').show();
         configure(json);
@@ -99,11 +100,17 @@ function onSaveButtonClicked() {
         success: function(response, textStatus, jqXHR) {
             console.log(response);
             $('#config').hide();
+            $('#alert-text').show();
+            $('#alert-text').addClass('alert-success');
+            $('#alert-text').text('Done');
         },
         error: function (jqXHR, textStatus, errorThrown) {
             console.log(jqXHR);
             console.log(textStatus);
             console.log(errorThrown);
+            $('#alert-text').show();
+            $('#alert-text').addClass('alert-danger');
+            $('#alert-text').text('Error updating configuration!');
         }
     });
 }
