@@ -17,12 +17,12 @@ function configure(json) {
     $('#local_ssid').text(json.local_ssid);
     //TODO: use the password length to display
     $('#local-scad-code').text(formatScadCode(json.local_mac));
-    if(json.remote_mac != ""){
+    if (json.remote_mac != "") {
         $('#remote-scad-code').text(formatScadCode(json.remote_mac));
+        $('#remote-scad-code-input').hide();
     } else {
-        $('#remote-scad-code').hide();
+        $('#remote-scad-text').hide();
     }
-
 
     configureDisplay(json.local_paired_status);
 
