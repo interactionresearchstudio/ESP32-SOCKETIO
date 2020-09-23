@@ -1,14 +1,7 @@
-# This is the name of the workflow, visible on GitHub UI.
 name: build
 
-# Here we tell GitHub to run the workflow when a commit
-# is pushed or a Pull Request is opened.
-on: push
+on: [push, pull_request]
 
-# This is the list of jobs that will be run concurrently.
-# Since we use a build matrix, the actual number of jobs
-# started depends on how many configurations the matrix
-# will produce.
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -96,3 +89,39 @@ jobs:
         with:
           name: build
           path: build/
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        if: startsWith(github.ref, 'v')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Yo-Yo Machines Firmware ${{ github.ref }}
+          draft: true
+          prerelease: false
+
+      - name: Upload app-combined.bin to Release
+        id: upload-release-asset-1
+        uses: actions/upload-release-asset@v1
+        if: startsWith(github.ref, 'v')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          asset_path: build/app-combined.bin
+          asset_name: app-combined.bin
+          asset_content_type: application/octet-stream
+
+      - name: Upload app.bin to Release
+        id: upload-release-asset-2
+        uses: actions/upload-release-asset@v1
+        if: startsWith(github.ref, 'v')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          asset_path: build/app.bin
+          asset_name: app.bin
+          asset_content_type: application/octet-stream
