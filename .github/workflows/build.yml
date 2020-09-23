@@ -22,6 +22,7 @@ jobs:
       - name: Install requirements
         run: |
           pip install pyserial
+          echo ${{github.ref}}
 
       - name: Install platform
         run: |
