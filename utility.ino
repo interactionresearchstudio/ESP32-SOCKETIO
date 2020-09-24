@@ -77,19 +77,23 @@ void handleButtonEvent(AceButton* button, uint8_t eventType, uint8_t buttonState
         case AceButton::kEventLongPressed:
           Serial.println("TOUCH: Long pressed");
           isSelectingColour = true;
+          ledChanged[USERLED] = true;
           // TODO also hold the LED at the colour for a little bit
           break;
         case AceButton::kEventReleased:
           Serial.println("TOUCH: released");
+          if (isSelectingColour == true) {
+            ledChanged[USERLED] = true;
+            fadeRGB(USERLED);
+          } else {
+            ledChanged[USERLED] = true;
+            fadeRGB(USERLED);
+            socketIO_sendColour();
+          }
           isSelectingColour = false;
-          ledChanged[USERLED] = true;
-          fadeRGB(USERLED);
           break;
         case AceButton::kEventClicked:
           Serial.println("TOUCH: clicked");
-          ledChanged[USERLED] = true;
-          fadeRGB(USERLED);
-          socketIO_sendColour();
           break;
       }
       break;
@@ -107,19 +111,23 @@ void handleTouchEvent(AceButton* button, uint8_t eventType, uint8_t buttonState)
     case AceButton::kEventLongPressed:
       Serial.println("TOUCH: Long pressed");
       isSelectingColour = true;
+      ledChanged[USERLED] = true;
       // TODO also hold the LED at the colour for a little bit
       break;
     case AceButton::kEventReleased:
       Serial.println("TOUCH: released");
+      if (isSelectingColour == true) {
+        ledChanged[USERLED] = true;
+        fadeRGB(USERLED);
+      } else {
+        ledChanged[USERLED] = true;
+        fadeRGB(USERLED);
+        socketIO_sendColour();
+      }
       isSelectingColour = false;
-      ledChanged[USERLED] = true;
-      fadeRGB(USERLED);
       break;
     case AceButton::kEventClicked:
       Serial.println("TOUCH: clicked");
-      ledChanged[USERLED] = true;
-      fadeRGB(USERLED);
-      socketIO_sendColour();
       break;
   }
 }
