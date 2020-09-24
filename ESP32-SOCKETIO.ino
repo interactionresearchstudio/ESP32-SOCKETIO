@@ -269,7 +269,7 @@ void loop() {
       wifiCheck();
       break;
   }
-
+  
   buttonBuiltIn.check();
   buttonExternal.check();
   buttonTouch.check();
