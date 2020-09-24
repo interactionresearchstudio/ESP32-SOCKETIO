@@ -167,3 +167,16 @@ String generateID() {
   String out = String(low);
   return  out;
 }
+
+void setupCapacitiveTouch() {
+  int touchAverage = 0;
+  for (byte i = 0; i < 10; i++) {
+    touchAverage = touchAverage+touchRead(CAPTOUCH);
+    delay(100);
+  }
+  touchAverage = touchAverage/10;
+  TOUCH_THRESHOLD = touchAverage - TOUCH_HYSTERESIS;
+  Serial.print("Touch threshold is:");
+  Serial.println(TOUCH_THRESHOLD);
+  touchConfig.setThreshold(TOUCH_THRESHOLD);
+}
