@@ -67,7 +67,7 @@ using namespace ace_button;
 #define USERLED 0
 #define REMOTELED 1
 #define RGBLEDPWMSTART 120
-#define LONGFADEMINUTESMAX 720
+#define LONGFADEMINUTESMAX 360
 #define LONGFADECHECKMILLIS 60000
 unsigned long  prevLongFadeVal = 0;
 uint8_t hue[NUMPIXELS];
