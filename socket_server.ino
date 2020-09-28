@@ -2,14 +2,17 @@
 void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len) {
 
   if (type == WS_EVT_CONNECT) {
-    if(getNumberOfMacAddresses() < 2){
-    currentPairedStatus = localSetup;
+    if (getNumberOfMacAddresses() >= 2) {
+      currentPairedStatus = localSetup;
     }
     Serial.println("Websocket client connection received");
     webSocketClientID = client->id();
     Serial.println(client->id());
   } else if (type == WS_EVT_DISCONNECT) {
     Serial.println("Client disconnected");
+    if (getNumberOfMacAddresses() >= 2) {
+      currentPairedStatus = pairedSetup;
+    }
   } else if (type == WS_EVT_DATA) {
     AwsFrameInfo * info = (AwsFrameInfo*)arg;
     if (info->final && info->index == 0 && info->len == len) {
