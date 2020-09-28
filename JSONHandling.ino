@@ -168,8 +168,6 @@ void addToWiFiJSON(String newSSID, String newPassword) {
     serializeJson(addresses, wifilist);
     preferences.putString("wifi", wifilist);
     Serial.print("creating json object and adding the local wificredentials");
-    //Serial.print(wifilist);
-    Serial.println("added to the wifi list");
   }
   preferences.end();
 }
