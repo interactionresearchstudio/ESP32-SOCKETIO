@@ -227,9 +227,12 @@ void getScanAsJson(JsonDocument& jsonDoc) {
 
   //Array is ordered by signal strength - strongest first
   for (int i = 0; i < n; ++i) {
-    JsonObject network  = networks.createNestedObject();
-    network["SSID"] = WiFi.SSID(i);
-    network["BSSID"] = WiFi.BSSIDstr(i);
-    network["RSSI"] = WiFi.RSSI(i);
+    String networkSSID = WiFi.SSID(i);
+    if (networkSSID.length() <= SSID_MAX_LENGTH) {
+      JsonObject network  = networks.createNestedObject();
+      network["SSID"] = WiFi.SSID(i);
+      network["BSSID"] = WiFi.BSSIDstr(i);
+      network["RSSI"] = WiFi.RSSI(i);
+    }
   }
 }
