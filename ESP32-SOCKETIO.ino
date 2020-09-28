@@ -34,6 +34,7 @@ int currentSetupStatus = setup_pending;
 #define VERSION "v0.2"
 #define ESP32set
 #define WIFICONNECTTIMEOUT 60000
+#define SSID_MAX_LENGTH 31
 
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
@@ -86,8 +87,6 @@ bool readyToFadeRGB[NUMPIXELS] = {false, false};
 bool isFadingRGB[NUMPIXELS] = {false, false};
 unsigned long fadeTimeRGB[NUMPIXELS];
 #define RGBFADEMILLIS 6
-
-
 
 #include "SPIFFS.h"
 
@@ -187,9 +186,7 @@ void setup() {
   macCredentials = preferences.getString("mac", "");
   preferences.end();
 
-  Serial.println("Stored wifi and mac addresses");
-  Serial.println(macCredentials);
-  Serial.println(wifiCredentials);
+  Serial.println("There are stored wifi and mac addresses (not shown for privacy)");
 
   setPairedStatus();
 
