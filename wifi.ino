@@ -20,23 +20,28 @@ boolean scanAndConnectToLocalSCADS() {
       Serial.print(")");
       Serial.println((WiFi.encryptionType(i) == WIFI_AUTH_OPEN) ? " " : "*");
       delay(10);
-      scads_ssid = WiFi.SSID(i);
-      if (scads_ssid.indexOf("Yo-Yo-") > -1) {
-        Serial.println("Found YOYO");
-        foundLocalSCADS = true;
-        wifiMulti.addAP(scads_ssid.c_str(), scads_pass.c_str());
-        while ((wifiMulti.run() != WL_CONNECTED)) {
-          delay(500);
-          Serial.print(".");
+      String networkSSID = WiFi.SSID(i);
+      if (networkSSID.length() <= SSID_MAX_LENGTH) {
+        scads_ssid = WiFi.SSID(i);
+        if (scads_ssid.indexOf("Yo-Yo-") > -1) {
+          Serial.println("Found YOYO");
+          foundLocalSCADS = true;
+          wifiMulti.addAP(scads_ssid.c_str(), scads_pass.c_str());
+          while ((wifiMulti.run() != WL_CONNECTED)) {
+            delay(500);
+            Serial.print(".");
+          }
+          Serial.println("");
+          Serial.println("WiFi connected");
+          Serial.println("IP address: ");
+          Serial.println(WiFi.localIP());
         }
-        Serial.println("");
-        Serial.println("WiFi connected");
-        Serial.println("IP address: ");
-        Serial.println(WiFi.localIP());
+      } else {
+        // SSID too long
+        Serial.println("SSID too long for use with current ESP-IDF");
       }
     }
   }
-
   return (foundLocalSCADS);
 }
 
@@ -108,12 +113,18 @@ String checkSsidForSpelling(String incomingSSID) {
     Serial.println(" networks found");
     for (int i = 0; i < n; ++i) {
       Serial.println(WiFi.SSID(i));
-      currMatch = levenshteinIgnoreCase(incomingSSID.c_str(), WiFi.SSID(i).c_str()) < 2;
-      if (levenshteinIgnoreCase(incomingSSID.c_str(), WiFi.SSID(i).c_str()) < 2) {
-        if (currMatch < prevMatch) {
-          prevMatch = currMatch;
-          matchID = i;
+      String networkSSID = WiFi.SSID(i);
+      if (networkSSID.length() <= SSID_MAX_LENGTH) {
+        currMatch = levenshteinIgnoreCase(incomingSSID.c_str(), WiFi.SSID(i).c_str()) < 2;
+        if (levenshteinIgnoreCase(incomingSSID.c_str(), WiFi.SSID(i).c_str()) < 2) {
+          if (currMatch < prevMatch) {
+            prevMatch = currMatch;
+            matchID = i;
+          }
         }
+      } else {
+        // SSID too long
+        Serial.println("SSID too long for use with current ESP-IDF");
       }
     }
     if (prevMatch != 255) {

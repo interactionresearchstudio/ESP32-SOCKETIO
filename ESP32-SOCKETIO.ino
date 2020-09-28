@@ -186,9 +186,7 @@ void setup() {
   macCredentials = preferences.getString("mac", "");
   preferences.end();
 
-  Serial.println("Stored wifi and mac addresses");
-  Serial.println(macCredentials);
-  Serial.println(wifiCredentials);
+  Serial.println("SThere are stored wifi and mac addresses (not shown for privacy)");
 
   setPairedStatus();
 

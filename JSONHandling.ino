@@ -25,12 +25,12 @@ void decodeData(const char* data) {
   } else if (doc.containsKey("ssid")) {
     String remoteSSID = doc["ssid"][0];
     Serial.println("I received a SSID");
-    Serial.println(remoteSSID);
+    //Serial.println(remoteSSID);
     if (remoteSSID != NULL) {
       if (doc.containsKey("password")) {
         String remotePASS = doc["password"][0];
         Serial.println("I received a Password");
-        Serial.println(remotePASS);
+        //Serial.println(remotePASS);
         JsonArray wifi = doc["ssid"];
         for (int i = 0; i < wifi.size(); i++) {
           addToWiFiJSON(doc["ssid"][i], doc["password"][i]);
@@ -168,8 +168,8 @@ void addToWiFiJSON(String newSSID, String newPassword) {
     serializeJson(addresses, wifilist);
     preferences.putString("wifi", wifilist);
     Serial.print("creating json object and adding the local wificredentials");
-    Serial.print(wifilist);
-    Serial.println(" to the wifi list");
+    //Serial.print(wifilist);
+    Serial.println("added to the wifi list");
   }
   preferences.end();
 }
