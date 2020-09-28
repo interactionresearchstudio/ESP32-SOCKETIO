@@ -80,14 +80,92 @@ void connectToWifi(String credentials) {
   Serial.println("Connecting to Router");
 
   long wifiMillis = millis();
-  while ((wifiMulti.run() != WL_CONNECTED)) {
-    if (millis() - wifiMillis > WIFICONNECTTIMEOUT) {
+  bool connectSuccess = false;
+  while (!connectSuccess) {
+    
+    uint8_t currentStatus = wifiMulti.run();
+
+#ifdef DEV
+    Serial.print("Status: ");
+    switch (currentStatus) {
+      case WL_CONNECTED:
+        Serial.println("WL_CONNECTED");
+        break;
+      case WL_IDLE_STATUS:
+        Serial.println("WL_IDLE_STATUS");
+        break;
+      case WL_NO_SSID_AVAIL:
+        Serial.println("WL_NO_SSID_AVAIL");
+        break;
+      case WL_SCAN_COMPLETED:
+        Serial.println("WL_SCAN_COMPLETED");
+        break;
+      case WL_CONNECT_FAILED:
+        Serial.println("WL_CONNECT_FAILED");
+        break;
+      case WL_CONNECTION_LOST:
+        Serial.println("WL_CONNECTION_LOST");
+        break;
+      case WL_DISCONNECTED:
+        Serial.println("WL_DISCONNECTED");
+        break;
+    }
+#endif
+
+    if (currentStatus == WL_CONNECTED) {
+      // Connected!
+      preferences.begin("scads", false);
+      bool hasConnected = preferences.getBool("hasConnected");
+      preferences.end();
+      if (!hasConnected) {
+        preferences.begin("scads", false);
+        preferences.putBool("hasConnected", true);
+        preferences.end();
+      }
+      connectSuccess = true;
+      break;
+    }
+
+    if (currentStatus == WL_NO_SSID_AVAIL) {
+      // Failed to authenticate, wipe credentials.
       Serial.println("Wifi connect failed, Please try your details again in the captive portal");
       preferences.begin("scads", false);
       preferences.putString("wifi", "");
       preferences.end();
       ESP.restart();
     }
+
+    if (millis() - wifiMillis > WIFICONNECTTIMEOUT) {
+      // Timeout, check if we're out of range.
+      preferences.begin("scads", false);
+      bool hasConnected = preferences.getBool("hasConnected");
+      preferences.end();
+      while (hasConnected) {
+        // Out of range, keep trying
+        uint8_t _currentStatus = wifiMulti.run();
+        if (_currentStatus == WL_CONNECTED) {
+          digitalWrite(LED_BUILTIN, 0);
+          preferences.begin("scads", false);
+          preferences.putBool("hasConnected", true);
+          preferences.end();
+          break;
+        }
+        else {
+          digitalWrite(LED_BUILTIN, 1);
+          delay(100);
+          Serial.print(".");
+        }
+      }
+      if (!hasConnected) {
+        // Wipe credentials and reset
+        Serial.println("Wifi connect failed, Please try your details again in the captive portal");
+        preferences.begin("scads", false);
+        preferences.putString("wifi", "");
+        preferences.end();
+        ESP.restart();
+      }
+    }
+
     delay(100);
     Serial.print(".");
   }
@@ -138,7 +216,7 @@ String checkSsidForSpelling(String incomingSSID) {
 }
 
 void wifiCheck() {
-  if (millis() - wificheckMillis  > wifiCheckTime) {
+  if (wificheckMillis - millis() > wifiCheckTime) {
     wificheckMillis = millis();
     if (wifiMulti.run() !=  WL_CONNECTED) {
       digitalWrite(LED_BUILTIN, 1);
