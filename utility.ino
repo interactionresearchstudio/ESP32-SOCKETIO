@@ -77,19 +77,23 @@ void handleButtonEvent(AceButton* button, uint8_t eventType, uint8_t buttonState
         case AceButton::kEventLongPressed:
           Serial.println("TOUCH: Long pressed");
           isSelectingColour = true;
+          ledChanged[USERLED] = true;
           // TODO also hold the LED at the colour for a little bit
           break;
         case AceButton::kEventReleased:
           Serial.println("TOUCH: released");
+          if (isSelectingColour == true) {
+            ledChanged[USERLED] = true;
+            fadeRGB(USERLED);
+          } else {
+            ledChanged[USERLED] = true;
+            fadeRGB(USERLED);
+            socketIO_sendColour();
+          }
           isSelectingColour = false;
-          ledChanged[USERLED] = true;
-          fadeRGB(USERLED);
           break;
         case AceButton::kEventClicked:
           Serial.println("TOUCH: clicked");
-          ledChanged[USERLED] = true;
-          fadeRGB(USERLED);
-          socketIO_sendColour();
           break;
       }
       break;
@@ -107,19 +111,23 @@ void handleTouchEvent(AceButton* button, uint8_t eventType, uint8_t buttonState)
     case AceButton::kEventLongPressed:
       Serial.println("TOUCH: Long pressed");
       isSelectingColour = true;
+      ledChanged[USERLED] = true;
       // TODO also hold the LED at the colour for a little bit
       break;
     case AceButton::kEventReleased:
       Serial.println("TOUCH: released");
+      if (isSelectingColour == true) {
+        ledChanged[USERLED] = true;
+        fadeRGB(USERLED);
+      } else {
+        ledChanged[USERLED] = true;
+        fadeRGB(USERLED);
+        socketIO_sendColour();
+      }
       isSelectingColour = false;
-      ledChanged[USERLED] = true;
-      fadeRGB(USERLED);
       break;
     case AceButton::kEventClicked:
       Serial.println("TOUCH: clicked");
-      ledChanged[USERLED] = true;
-      fadeRGB(USERLED);
-      socketIO_sendColour();
       break;
   }
 }
@@ -158,4 +166,17 @@ String generateID() {
   uint32_t high = (chipID >> 32) % 0xFFFFFFFF;
   String out = String(low);
   return  out;
+}
+
+void setupCapacitiveTouch() {
+  int touchAverage = 0;
+  for (byte i = 0; i < 10; i++) {
+    touchAverage = touchAverage+touchRead(CAPTOUCH);
+    delay(100);
+  }
+  touchAverage = touchAverage/10;
+  TOUCH_THRESHOLD = touchAverage - TOUCH_HYSTERESIS;
+  Serial.print("Touch threshold is:");
+  Serial.println(TOUCH_THRESHOLD);
+  touchConfig.setThreshold(TOUCH_THRESHOLD);
 }

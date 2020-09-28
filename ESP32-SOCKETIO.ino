@@ -129,15 +129,19 @@ class CapacitiveConfig: public ButtonConfig {
       _pin = pin;
       _threshold = threshold;
     }
-
+    void setThreshold(uint16_t CapThreshold) {
+      _threshold = CapThreshold;
+    }
   protected:
     int readButton(uint8_t /*pin*/) override {
       uint16_t val = touchRead(_pin);
       return (val < _threshold) ? LOW : HIGH;
     }
+
 };
 
-#define TOUCH_THRESHOLD 60
+int TOUCH_THRESHOLD = 60;
+int TOUCH_HYSTERESIS = 20;
 #define LONG_TOUCH 1500
 CapacitiveConfig touchConfig(CAPTOUCH, TOUCH_THRESHOLD);
 AceButton buttonTouch(&touchConfig);
@@ -167,9 +171,11 @@ int port = 80; // Socket.IO Port Address
 char path[] = "/socket.io/?transport=websocket"; // Socket.IO Base Path
 
 void setup() {
+
   setupPixels();
   Serial.begin(115200);
   setupPins();
+  setupCapacitiveTouch();
 
   //create 10 digit ID
   myID = generateID();
@@ -263,7 +269,7 @@ void loop() {
       wifiCheck();
       break;
   }
-
+  
   buttonBuiltIn.check();
   buttonExternal.check();
   buttonTouch.check();

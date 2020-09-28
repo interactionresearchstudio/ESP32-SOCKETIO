@@ -127,7 +127,7 @@ String checkSsidForSpelling(String incomingSSID) {
 }
 
 void wifiCheck() {
-  if (wificheckMillis - millis() > wifiCheckTime) {
+  if (millis() - wificheckMillis  > wifiCheckTime) {
     wificheckMillis = millis();
     if (wifiMulti.run() !=  WL_CONNECTED) {
       digitalWrite(LED_BUILTIN, 1);
