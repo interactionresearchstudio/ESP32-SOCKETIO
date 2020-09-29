@@ -1,6 +1,10 @@
 function init() {
     $('#config').hide();
     $('#alert-text').hide();
+
+    $('#networks-list-select').attr('disabled', true);
+    $('#local_pass').attr('disabled', true);
+
     $.getJSON('/credentials', function (json) {
         $('#config').show();
         configure(json);
@@ -11,12 +15,8 @@ function configure(json) {
     console.log(json);
 
     $('#save-button').click(onSaveButtonClicked);
-
-    $('#local_ssid').keypress(onKeyPressed);
     $('#local_pass').keypress(onKeyPressed);
 
-    $('#local_ssid').text(json.local_ssid);
-    //TODO: use the password length to display
     $('#local-scad-code').text(formatScadCode(json.local_mac));
     if (json.remote_mac != "") {
         $('#remote-scad-code').text(formatScadCode(json.remote_mac));
@@ -27,8 +27,8 @@ function configure(json) {
 
     configureDisplay(json.local_paired_status);
 
-    $('#local_ssid').attr('disabled', true);
-    populateNetworksList();
+    populateNetworksList(json.local_ssid);
+    //TODO: use the password length to display
 }
 
 function configureDisplay(local_paired_status) {
@@ -65,16 +65,22 @@ function onKeyPressed(event) {
     }
 }
 
-function populateNetworksList() {
+function populateNetworksList(selectedNetwork) {
     let networks = $('#networks-list-select');
-    networks.empty();
 
     $.getJSON('/scan', function (json) {
-        networks.append('<option value="" disabled selected>Network Name</option>');
+        networks.empty();
         $.each(json, function (key, entry) {
-            networks.append($('<option></option>').attr('value', entry.SSID).text(entry.SSID));
+            let network = $('<option></option>');
+
+            network.attr('value', entry.SSID).text(entry.SSID);
+            if(entry.SSID == selectedNetwork) network.attr('selected', true);
+
+            networks.append(network);
         });
-        $('#local_ssid').attr('disabled', false);
+
+        $('#networks-list-select').attr('disabled', false);
+        $('#local_pass').attr('disabled', false);
     });
 }
 
