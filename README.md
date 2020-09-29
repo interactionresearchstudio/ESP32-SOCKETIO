@@ -1,3 +1,4 @@
+![Build](https://img.shields.io/github/workflow/status/interactionresearchstudio/ESP32-SOCKETIO/build)
 ![Downloads](https://img.shields.io/github/downloads/interactionresearchstudio/ESP32-SOCKETIO/total)
 ![Release](https://img.shields.io/github/v/release/interactionresearchstudio/ESP32-SOCKETIO?include_prereleases)
 
