@@ -9,4 +9,5 @@ Please use the Yo-Yo Firmware Uploader to upload the latest firmware onto your d
 Alternatively, clone this repository and use with the Arduino IDE.
 
 ## Issues
-Please report issues on here with as much information as possible. 
+Please report issues on here with as much information as possible, including relevant
+screenshots and system information.
