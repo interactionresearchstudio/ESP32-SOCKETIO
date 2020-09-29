@@ -238,7 +238,7 @@ void setPairedStatus() {
 
 String getCurrentPairedStatusAsString() {
   String currentPairedStatusAsString = "";
-
+  
   switch (currentPairedStatus) {
     case remoteSetup:      currentPairedStatusAsString = "remoteSetup"; break;
     case localSetup:       currentPairedStatusAsString = "localSetup";  break;
@@ -266,7 +266,7 @@ void loop() {
       wifiCheck();
       break;
   }
-  
+
   buttonBuiltIn.check();
   buttonExternal.check();
   buttonTouch.check();
