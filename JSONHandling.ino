@@ -25,12 +25,10 @@ void decodeData(const char* data) {
   } else if (doc.containsKey("ssid")) {
     String remoteSSID = doc["ssid"][0];
     Serial.println("I received a SSID");
-    Serial.println(remoteSSID);
     if (remoteSSID != NULL) {
       if (doc.containsKey("password")) {
         String remotePASS = doc["password"][0];
         Serial.println("I received a Password");
-        Serial.println(remotePASS);
         JsonArray wifi = doc["ssid"];
         for (int i = 0; i < wifi.size(); i++) {
           addToWiFiJSON(doc["ssid"][i], doc["password"][i]);
@@ -168,8 +166,6 @@ void addToWiFiJSON(String newSSID, String newPassword) {
     serializeJson(addresses, wifilist);
     preferences.putString("wifi", wifilist);
     Serial.print("creating json object and adding the local wificredentials");
-    Serial.print(wifilist);
-    Serial.println(" to the wifi list");
   }
   preferences.end();
 }
@@ -227,9 +223,12 @@ void getScanAsJson(JsonDocument& jsonDoc) {
 
   //Array is ordered by signal strength - strongest first
   for (int i = 0; i < n; ++i) {
-    JsonObject network  = networks.createNestedObject();
-    network["SSID"] = WiFi.SSID(i);
-    network["BSSID"] = WiFi.BSSIDstr(i);
-    network["RSSI"] = WiFi.RSSI(i);
+    String networkSSID = WiFi.SSID(i);
+    if (networkSSID.length() <= SSID_MAX_LENGTH) {
+      JsonObject network  = networks.createNestedObject();
+      network["SSID"] = WiFi.SSID(i);
+      network["BSSID"] = WiFi.BSSIDstr(i);
+      network["RSSI"] = WiFi.RSSI(i);
+    }
   }
 }

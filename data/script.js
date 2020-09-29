@@ -85,7 +85,7 @@ function populateNetworksList(selectedNetwork) {
 
 function onSaveButtonClicked(event) {
     event.preventDefault();
-
+    
     var data = {
         local_ssid: $('#networks-list-select').children("option:selected").val(),
         local_pass: $('#local_pass').val(),
@@ -93,6 +93,15 @@ function onSaveButtonClicked(event) {
         remote_ssid: $('#remote_ssid').val(),
         remote_pass: $('#remote_pass').val()
     };
+
+    if ($('#remoteMacForm').is(":visible") && data.remote_mac == "") {
+      $('#remote-scad-code-input').addClass('is-invalid');
+      $('#alert-text').show();
+      $('#alert-text').addClass('alert-danger');
+      $('#alert-text').text('Please enter the required fields below.');
+      $(window).scrollTop(0);
+      return;
+    }
 
     //NB dataType is 'text' otherwise json validation fails on Safari
     $.ajax({
@@ -108,6 +117,7 @@ function onSaveButtonClicked(event) {
             console.log(response);
             $('#config').hide();
             $('#alert-text').show();
+            $('#alert-text').removeClass('alert-danger');
             $('#alert-text').addClass('alert-success');
             $('#alert-text').text('Done');
 

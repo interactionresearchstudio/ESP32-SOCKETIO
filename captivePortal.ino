@@ -25,11 +25,11 @@ class CaptiveRequestHandler : public AsyncWebHandler {
           else if (request->url().endsWith(".html") || request->url().endsWith("/") || request->url().endsWith("generate_204") || request->url().endsWith("redirect"))  {
             sendFile(request, "/index.html");
           }
-          else if (request->url().endsWith("connecttest.txt")) {
+          else if (request->url().endsWith("connecttest.txt") || request->url().endsWith("ncsi.txt")) {
             request->send(200, "text/plain", "Microsoft NCSI");
           }
           else {
-            request->send(404);
+            request->send(304);
           }
         }
       }
