@@ -85,7 +85,7 @@ function populateNetworksList(selectedNetwork) {
 
 function onSaveButtonClicked(event) {
     event.preventDefault();
-    
+
     var data = {
         local_ssid: $('#networks-list-select').children("option:selected").val(),
         local_pass: $('#local_pass').val(),
@@ -121,7 +121,7 @@ function onSaveButtonClicked(event) {
             $('#alert-text').addClass('alert-success');
             $('#alert-text').text('Done');
 
-            setTimeout(function(){ reboot(); }, 10000);
+            setTimeout(function(){ reboot(); }, 2000);
         },
         error: function (jqXHR, textStatus, errorThrown) {
             console.log(jqXHR);
