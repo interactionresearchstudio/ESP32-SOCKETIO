@@ -71,7 +71,9 @@ void connectToWifi(String credentials) {
   JsonArray pass = doc["password"];
   if (ssid.size() > 0) {
     for (int i = 0; i < ssid.size(); i++) {
+      if (isWifiValid(ssid[i])) {
       wifiMulti.addAP(checkSsidForSpelling(ssid[i]).c_str(), pass[i]);
+      }
     }
   } else {
     Serial.println("issue with wifi credentials, creating access point");
@@ -81,11 +83,16 @@ void connectToWifi(String credentials) {
 
   long wifiMillis = millis();
   bool connectSuccess = false;
+
+  preferences.begin("scads", false);
+  bool hasConnected = preferences.getBool("hasConnected");
+  preferences.end();
+
   while (!connectSuccess) {
-    
+
     uint8_t currentStatus = wifiMulti.run();
 
-#ifdef DEV
+    //#ifdef DEV
     Serial.print("Status: ");
     switch (currentStatus) {
       case WL_CONNECTED:
@@ -110,36 +117,23 @@ void connectToWifi(String credentials) {
         Serial.println("WL_DISCONNECTED");
         break;
     }
-#endif
+    //#endif
 
     if (currentStatus == WL_CONNECTED) {
       // Connected!
-      preferences.begin("scads", false);
-      bool hasConnected = preferences.getBool("hasConnected");
-      preferences.end();
+
       if (!hasConnected) {
         preferences.begin("scads", false);
         preferences.putBool("hasConnected", true);
         preferences.end();
+        hasConnected = true;
       }
       connectSuccess = true;
       break;
     }
 
-    if (currentStatus == WL_NO_SSID_AVAIL) {
-      // Failed to authenticate, wipe credentials.
-      Serial.println("Wifi connect failed, Please try your details again in the captive portal");
-      preferences.begin("scads", false);
-      preferences.putString("wifi", "");
-      preferences.end();
-      ESP.restart();
-    }
-
     if (millis() - wifiMillis > WIFICONNECTTIMEOUT) {
       // Timeout, check if we're out of range.
-      preferences.begin("scads", false);
-      bool hasConnected = preferences.getBool("hasConnected");
-      preferences.end();
       while (hasConnected) {
         // Out of range, keep trying
         uint8_t _currentStatus = wifiMulti.run();
@@ -155,6 +149,7 @@ void connectToWifi(String credentials) {
           delay(100);
           Serial.print(".");
         }
+        yield();
       }
       if (!hasConnected) {
         // Wipe credentials and reset
@@ -167,6 +162,7 @@ void connectToWifi(String credentials) {
     }
 
     delay(100);
+    yield();
     Serial.print(".");
   }
   Serial.println("");
@@ -216,11 +212,51 @@ String checkSsidForSpelling(String incomingSSID) {
 }
 
 void wifiCheck() {
-  if (wificheckMillis - millis() > wifiCheckTime) {
+  if (millis() - wificheckMillis > wifiCheckTime) {
     wificheckMillis = millis();
     if (wifiMulti.run() !=  WL_CONNECTED) {
       digitalWrite(LED_BUILTIN, 1);
       disconnected = true;
     }
   }
+}
+
+bool isWifiValid(String incomingSSID) {
+  int n = WiFi.scanNetworks();
+  int currMatch = 255;
+  int prevMatch = currMatch;
+  int matchID;
+  Serial.println("scan done");
+  if (n == 0) {
+    Serial.println("no networks found");
+    Serial.println("can't find any wifi in the area");
+    return false;
+  } else {
+    Serial.print(n);
+    Serial.println(" networks found");
+    for (int i = 0; i < n; ++i) {
+      Serial.println(WiFi.SSID(i));
+      String networkSSID = WiFi.SSID(i);
+      if (networkSSID.length() <= SSID_MAX_LENGTH) {
+        currMatch = levenshteinIgnoreCase(incomingSSID.c_str(), WiFi.SSID(i).c_str()) < 2;
+        if (levenshteinIgnoreCase(incomingSSID.c_str(), WiFi.SSID(i).c_str()) < 2) {
+          if (currMatch < prevMatch) {
+            prevMatch = currMatch;
+            matchID = i;
+          }
+        }
+      } else {
+        // SSID too long
+        Serial.println("SSID too long for use with current ESP-IDF");
+      }
+    }
+    if (prevMatch != 255) {
+      Serial.println("Found a match!");
+      return true;
+    } else {
+      Serial.println("can't find any wifi that are close enough matches in the area");
+      return false;
+    }
+  }
+
 }
