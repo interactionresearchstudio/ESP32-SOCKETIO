@@ -1,5 +1,13 @@
-Initial ESP32 SocketsIO test for SCADS
+![Downloads](https://img.shields.io/github/downloads/interactionresearchstudio/ESP32-SOCKETIO/total)
+![Release](https://img.shields.io/github/v/release/interactionresearchstudio/ESP32-SOCKETIO?include_prereleases)
 
-Included both socketsio and websockets (has been edited) in the repo for now. Add these to your Arduino library folder.
+# Yo-Yo Machines Firmware
+Firmware for Yo-Yo Machines.
 
-Latest ArduinoJSON library is needed, which can be downloaded through arduino library manager.
+## How to use
+Please use the Yo-Yo Firmware Uploader to upload the latest firmware onto your device.
+Alternatively, clone this repository and use with the Arduino IDE.
+
+## Issues
+Please report issues on here with as much information as possible, including relevant
+screenshots and system information.
