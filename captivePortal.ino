@@ -27,6 +27,9 @@ class CaptiveRequestHandler : public AsyncWebHandler {
           }
           else if (request->url().endsWith("connecttest.txt") || request->url().endsWith("ncsi.txt")) {
             request->send(200, "text/plain", "Microsoft NCSI");
+           } else if (strstr(request->url().c_str(), "generate_204_") != NULL) {
+            Serial.println("you must be huawei!");
+            sendFile(request, "/index.html");
           }
           else {
             request->send(304);
