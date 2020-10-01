@@ -11,8 +11,8 @@ class CaptiveRequestHandler : public AsyncWebHandler {
     void handleRequest(AsyncWebServerRequest *request) {
       Serial.print("handleRequest: ");
       Serial.println(request->url());
-      
-      if(!isResetting) {
+
+      if (!isResetting) {
         if (request->method() == HTTP_GET) {
           if (request->url() == "/credentials") getCredentials(request);
           else if (request->url() == "/scan")   getScan(request);
@@ -22,6 +22,9 @@ class CaptiveRequestHandler : public AsyncWebHandler {
           }
           else if (request->url().endsWith("connecttest.txt") || request->url().endsWith("ncsi.txt")) {
             request->send(200, "text/plain", "Microsoft NCSI");
+          } else if (strstr(request->url().c_str(), "generate_204_") != NULL) {
+            Serial.println("you must be huawei!");
+            sendFile(request, "/index.html");
           }
           else {
             request->send(304);
@@ -34,17 +37,17 @@ class CaptiveRequestHandler : public AsyncWebHandler {
       Serial.print("handleBody: ");
       Serial.println(request->url());
 
-      if(!isResetting) {
+      if (!isResetting) {
         if (request->method() == HTTP_POST) {
           if (request->url() == "/credentials") {
             String json = "";
             for (int i = 0; i < len; i++)  json += char(data[i]);
-  
+
             StaticJsonDocument<1024> settingsJsonDoc;
             if (!deserializeJson(settingsJsonDoc, json)) {
               bool readyToReset = setCredentials(settingsJsonDoc.as<JsonObject>());
               request->send(200);
-  
+
               if (readyToReset) {
                 socket_server.textAll("RESTART");
                 softReset();
@@ -109,7 +112,7 @@ class CaptiveRequestHandler : public AsyncWebHandler {
 
     bool setCredentials(JsonVariant json) {
       bool readyToReset = false;
-      
+
       Serial.println("setCredentials");
 
       String local_ssid = json["local_ssid"].as<String>();
@@ -138,7 +141,7 @@ class CaptiveRequestHandler : public AsyncWebHandler {
         readyToReset = true;
       }
 
-      return(readyToReset);
+      return (readyToReset);
     }
 
     void getScan(AsyncWebServerRequest * request) {
