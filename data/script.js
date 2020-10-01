@@ -60,8 +60,7 @@ function formatScadCode(code) {
 
 function onKeyPressed(event) {
     if (event.keyCode == 13) {
-        event.preventDefault();
-        onSaveButtonClicked();
+        onSaveButtonClicked(event);
     }
 }
 
@@ -86,6 +85,7 @@ function populateNetworksList(selectedNetwork) {
 
 function onSaveButtonClicked(event) {
     event.preventDefault();
+
     var data = {
         local_ssid: $('#networks-list-select').children("option:selected").val(),
         local_pass: $('#local_pass').val(),
@@ -120,6 +120,8 @@ function onSaveButtonClicked(event) {
             $('#alert-text').removeClass('alert-danger');
             $('#alert-text').addClass('alert-success');
             $('#alert-text').text('Done');
+
+            setTimeout(function(){ reboot(); }, 2000);
         },
         error: function (jqXHR, textStatus, errorThrown) {
             console.log(jqXHR);
@@ -128,6 +130,24 @@ function onSaveButtonClicked(event) {
             $('#alert-text').show();
             $('#alert-text').addClass('alert-danger');
             $('#alert-text').text('Error updating configuration!');
+        }
+    });
+}
+
+function reboot() {
+    $.ajax({
+        type: "GET",
+        url: "/reboot",
+        cache: false,
+        timeout: 15000,
+        async: false,
+        success: function(response, textStatus, jqXHR) {
+            console.log(response);
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            console.log(jqXHR);
+            console.log(textStatus);
+            console.log(errorThrown);
         }
     });
 }

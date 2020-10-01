@@ -19,8 +19,10 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
       socket_client.sendTXT(getJSONMac().c_str());
       break;
     case WStype_TEXT:
-      Serial.println("Text:");
+      Serial.println("Text received");
+      #ifdef DEV
       Serial.println((char *)payload);
+      #endif
       String output = (char *)payload;
       if (output == "RESTART") {
         softReset();

@@ -15,6 +15,11 @@ class CaptiveRequestHandler : public AsyncWebHandler {
       if (!isResetting) {
         if (request->method() == HTTP_GET) {
           if (request->url() == "/credentials") getCredentials(request);
+          else if(request->url() == "/reboot") {
+              request->send(200);
+              socket_server.textAll("RESTART");
+              softReset();
+          }
           else if (request->url() == "/scan")   getScan(request);
           else if (SPIFFS.exists(request->url())) sendFile(request, request->url());
           else if (request->url().endsWith(".html") || request->url().endsWith("/") || request->url().endsWith("generate_204") || request->url().endsWith("redirect"))  {
@@ -22,7 +27,7 @@ class CaptiveRequestHandler : public AsyncWebHandler {
           }
           else if (request->url().endsWith("connecttest.txt") || request->url().endsWith("ncsi.txt")) {
             request->send(200, "text/plain", "Microsoft NCSI");
-          } else if (strstr(request->url().c_str(), "generate_204_") != NULL) {
+           } else if (strstr(request->url().c_str(), "generate_204_") != NULL) {
             Serial.println("you must be huawei!");
             sendFile(request, "/index.html");
           }
@@ -45,13 +50,8 @@ class CaptiveRequestHandler : public AsyncWebHandler {
 
             StaticJsonDocument<1024> settingsJsonDoc;
             if (!deserializeJson(settingsJsonDoc, json)) {
-              bool readyToReset = setCredentials(settingsJsonDoc.as<JsonObject>());
-              request->send(200);
-
-              if (readyToReset) {
-                socket_server.textAll("RESTART");
-                softReset();
-              }
+              if(setCredentials(settingsJsonDoc.as<JsonObject>())) request->send(200);
+              else request->send(400);
             }
           }
           else {
@@ -111,8 +111,8 @@ class CaptiveRequestHandler : public AsyncWebHandler {
     }
 
     bool setCredentials(JsonVariant json) {
-      bool readyToReset = false;
-
+      bool result = false;
+      
       Serial.println("setCredentials");
 
       String local_ssid = json["local_ssid"].as<String>();
@@ -123,7 +123,7 @@ class CaptiveRequestHandler : public AsyncWebHandler {
 
       if (remote_mac != "") {
         addToMacAddressJSON(remote_mac);
-        readyToReset = true;
+        result = true;
       }
 
       if (remote_pass != "" && remote_ssid != "" && local_ssid != "" && local_pass != "") {
@@ -132,16 +132,16 @@ class CaptiveRequestHandler : public AsyncWebHandler {
         addToWiFiJSON(local_ssid, local_pass);
         addToWiFiJSON(remote_ssid, remote_pass);
         sendWifiCredentials();
-        readyToReset = true;
+        result = true;
       }
       else if (local_pass != "" && local_ssid != "" && remote_ssid == "" && remote_pass == "") {
         local_ssid = checkSsidForSpelling(local_ssid);
         addToWiFiJSON(local_ssid, local_pass);
         sendWifiCredentials();
-        readyToReset = true;
+        result = true;
       }
 
-      return (readyToReset);
+      return(result);
     }
 
     void getScan(AsyncWebServerRequest * request) {
