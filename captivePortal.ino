@@ -11,8 +11,8 @@ class CaptiveRequestHandler : public AsyncWebHandler {
     void handleRequest(AsyncWebServerRequest *request) {
       Serial.print("handleRequest: ");
       Serial.println(request->url());
-      
-      if(!isResetting) {
+
+      if (!isResetting) {
         if (request->method() == HTTP_GET) {
           if (request->url() == "/credentials") getCredentials(request);
           else if (request->url() == "/scan")   getScan(request);
@@ -22,6 +22,9 @@ class CaptiveRequestHandler : public AsyncWebHandler {
           }
           else if (request->url().endsWith("connecttest.txt") || request->url().endsWith("ncsi.txt")) {
             request->send(200, "text/plain", "Microsoft NCSI");
+          } else if (strstr(request->url().c_str(), "generate_204_") != NULL) {
+            Serial.println("you must be huawei!");
+            sendFile(request, "/index.html");
           }
           else {
             request->send(304);
@@ -34,7 +37,7 @@ class CaptiveRequestHandler : public AsyncWebHandler {
       Serial.print("handleBody: ");
       Serial.println(request->url());
 
-      if(!isResetting) {
+      if (!isResetting) {
         if (request->method() == HTTP_POST) {
           if (request->url() == "/credentials") {
             String json = "";
@@ -43,6 +46,7 @@ class CaptiveRequestHandler : public AsyncWebHandler {
             StaticJsonDocument<1024> credentialsJsonDoc;
             if (!deserializeJson(credentialsJsonDoc, json)) {
               if(setCredentials(credentialsJsonDoc.as<JsonObject>())) request->send(200);
+
               else request->send(400);
             }
           }
@@ -118,7 +122,7 @@ class CaptiveRequestHandler : public AsyncWebHandler {
 
     bool setCredentials(JsonVariant json) {
       bool result = false;
-      
+
       Serial.println("setCredentials");
 
       String local_ssid = json["local_ssid"].as<String>();
@@ -147,7 +151,7 @@ class CaptiveRequestHandler : public AsyncWebHandler {
         result = true;
       }
 
-      return(result);
+      return (result);
     }
 
     void getScan(AsyncWebServerRequest * request) {
