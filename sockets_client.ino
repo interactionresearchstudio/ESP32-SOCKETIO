@@ -12,7 +12,7 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
     case WStype_DISCONNECTED:
       Serial.println("[WSc] Disconnected!\n");
       //Hot fix for when client doesn't catch RESTART command
-      softReset();
+      softReset(0);
       break;
     case WStype_CONNECTED:
       Serial.println("Connected!");
@@ -23,7 +23,7 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
       Serial.println((char *)payload);
       String output = (char *)payload;
       if (output == "RESTART") {
-        softReset();
+        softReset(0);
         Serial.println("i'm going to reset");
       } else {
         decodeData((char *)payload);
