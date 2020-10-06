@@ -144,16 +144,16 @@ void factoryReset() {
   ESP.restart();
 }
 
-void softReset() {
+void softReset(int delayMs) {
   if (isResetting == false) {
     isResetting = true;
-    resetTime = millis();
+    resetTime = millis() + delayMs;
   }
 }
 
 void checkReset() {
   if (isResetting) {
-    if (millis() - resetTime > resetLength) {
+    if (millis() > resetTime + resetDurationMs) {
       ESP.restart();
     }
   }
