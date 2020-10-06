@@ -124,7 +124,7 @@ function onSaveButtonClicked(event) {
             $('#alert-text').text('Saved');
             $('#nextstep').show();
 
-            setTimeout(function(){ reboot(); }, 10000);
+            reboot(10000);
         },
         error: function (jqXHR, textStatus, errorThrown) {
             console.log(jqXHR);
@@ -137,10 +137,13 @@ function onSaveButtonClicked(event) {
     });
 }
 
-function reboot() {
+function reboot(t) {
     $.ajax({
-        type: "GET",
+        type: "POST",
         url: "/reboot",
+        data: JSON.stringify({ delay: t }),
+        dataType: 'text',
+        contentType: 'application/json; charset=utf-8',
         cache: false,
         timeout: 15000,
         async: false,
