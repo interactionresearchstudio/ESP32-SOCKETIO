@@ -184,7 +184,7 @@ void setupCapacitiveTouch() {
   touchConfig.setThreshold(TOUCH_THRESHOLD);
 }
 
-int checkFadingLength() {
+long checkFadingLength() {
   if (digitalRead(FADE_3) == 0 && digitalRead(FADE_1) == 1) {
     Serial.println("Your fade time is 3 hours");
     return 180;

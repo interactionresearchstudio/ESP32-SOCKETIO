@@ -112,11 +112,11 @@ void longFadeHandler() {
     if (millis() - prevLongFadeMillis > LONGFADECHECKMILLIS) {
       prevLongFadeMillis = millis();
       longFadeMinutes--;
-      unsigned long currLongFadeVal = longFadeMinutes / (LONGFADEMINUTESMAX / RGBLEDPWMSTART);
+      unsigned long currLongFadeVal = long((float)longFadeMinutes / ((float)LONGFADEMINUTESMAX / (float)RGBLEDPWMSTART));
       if (currLongFadeVal != prevLongFadeVal) {
         prevLongFadeVal = currLongFadeVal;
         currLongFadeVal = currLongFadeVal - 1;
-        value[REMOTELED] = (byte)fscale(0,RGBLEDPWMSTART,0,RGBLEDPWMSTART,currLongFadeVal,-3);
+        value[REMOTELED] = (byte)fscale(0, RGBLEDPWMSTART, 0, RGBLEDPWMSTART, currLongFadeVal, -3);
         ledChanged[REMOTELED] = true;
         Serial.println(value[REMOTELED]);
       }
