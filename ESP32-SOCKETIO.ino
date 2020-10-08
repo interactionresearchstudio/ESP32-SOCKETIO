@@ -1,6 +1,9 @@
 //#define DEV
 //#define STAGING
 
+#define FADE_3 22
+#define FADE_1 21
+
 #define EXTERNAL_BUTTON 23
 #define CAPTOUCH T0
 
@@ -69,7 +72,7 @@ using namespace ace_button;
 #define REMOTELED 1
 #define RGBLEDPWMSTART 120
 #define FASTLONGFADE 120
-#define LONGFADEMINUTESMAX 360
+int LONGFADEMINUTESMAX = 360;
 #define LONGFADECHECKMILLIS 60000
 unsigned long  prevLongFadeVal = 0;
 uint8_t hue[NUMPIXELS];
@@ -171,10 +174,10 @@ int port = 80; // Socket.IO Port Address
 char path[] = "/socket.io/?transport=websocket"; // Socket.IO Base Path
 
 void setup() {
-
   setupPixels();
   Serial.begin(115200);
   setupPins();
+  LONGFADEMINUTESMAX = checkFadingLength();
   setupCapacitiveTouch();
 
   //create 10 digit ID
@@ -239,7 +242,7 @@ void setPairedStatus() {
 
 String getCurrentPairedStatusAsString() {
   String currentPairedStatusAsString = "";
-  
+
   switch (currentPairedStatus) {
     case remoteSetup:      currentPairedStatusAsString = "remoteSetup"; break;
     case localSetup:       currentPairedStatusAsString = "localSetup";  break;
