@@ -4,6 +4,9 @@ void setupPins() {
   pinMode(BUTTON_BUILTIN, INPUT);
   pinMode(EXTERNAL_BUTTON, INPUT_PULLUP);
 
+  pinMode(FADE_3, INPUT_PULLUP);
+  pinMode(FADE_1, INPUT_PULLUP);
+
   ButtonConfig* buttonConfigBuiltIn = buttonBuiltIn.getButtonConfig();
   buttonConfigBuiltIn->setEventHandler(handleButtonEvent);
   buttonConfigBuiltIn->setFeature(ButtonConfig::kFeatureClick);
@@ -171,12 +174,28 @@ String generateID() {
 void setupCapacitiveTouch() {
   int touchAverage = 0;
   for (byte i = 0; i < 10; i++) {
-    touchAverage = touchAverage+touchRead(CAPTOUCH);
+    touchAverage = touchAverage + touchRead(CAPTOUCH);
     delay(100);
   }
-  touchAverage = touchAverage/10;
+  touchAverage = touchAverage / 10;
   TOUCH_THRESHOLD = touchAverage - TOUCH_HYSTERESIS;
   Serial.print("Touch threshold is:");
   Serial.println(TOUCH_THRESHOLD);
   touchConfig.setThreshold(TOUCH_THRESHOLD);
+}
+
+int checkFadingLength() {
+  if (digitalRead(FADE_3) == 0 && digitalRead(FADE_1) == 1) {
+    Serial.println("Your fade time is 3 hours");
+    return 180;
+  } else if (digitalRead(FADE_1) == 0 && digitalRead(FADE_3) == 1) {
+    Serial.println("Your fade time is 1 hour");
+    return 60;
+  } else if (digitalRead(FADE_3) == 0 && digitalRead(FADE_1) == 0) {
+    Serial.println("Your fade time is 9 hours");
+    return 540;
+  } else {
+    Serial.println("Your fade time is 6 hours");
+    return 360;
+  }
 }
