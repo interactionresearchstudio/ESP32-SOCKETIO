@@ -15,11 +15,6 @@ class CaptiveRequestHandler : public AsyncWebHandler {
       if (!isResetting) {
         if (request->method() == HTTP_GET) {
           if (request->url() == "/credentials") getCredentials(request);
-          else if (request->url() == "/reboot") {
-            request->send(200);
-            socket_server.textAll("RESTART");
-            softReset();
-          }
           else if (request->url() == "/scan")   getScan(request);
           else if (SPIFFS.exists(request->url())) sendFile(request, request->url());
           else if (request->url().endsWith(".html") || request->url().endsWith("/") || request->url().endsWith("generate_204") || request->url().endsWith("redirect"))  {
@@ -47,12 +42,27 @@ class CaptiveRequestHandler : public AsyncWebHandler {
           if (request->url() == "/credentials") {
             String json = "";
             for (int i = 0; i < len; i++)  json += char(data[i]);
+  
+            StaticJsonDocument<1024> credentialsJsonDoc;
+            if (!deserializeJson(credentialsJsonDoc, json)) {
+              if(setCredentials(credentialsJsonDoc.as<JsonObject>())) request->send(200);
 
-            StaticJsonDocument<1024> settingsJsonDoc;
-            if (!deserializeJson(settingsJsonDoc, json)) {
-              if (setCredentials(settingsJsonDoc.as<JsonObject>())) request->send(200);
               else request->send(400);
             }
+          }
+          else if(request->url() == "/reboot") {
+              String json = "";
+              for (int i = 0; i < len; i++)  json += char(data[i]);
+    
+              StaticJsonDocument<256> rebootJsonDoc;
+              if (!deserializeJson(rebootJsonDoc, json)) {
+                int delayMs = rebootJsonDoc["delay"];
+
+                softReset(delayMs);
+                socket_server.textAll("RESTART");
+              }
+
+              request->send(200);
           }
           else {
             request->send(404);

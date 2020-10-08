@@ -1,5 +1,6 @@
 function init() {
     $('#config').hide();
+    $('#nextstep').hide();
     $('#alert-text').hide();
 
     $('#networks-list-select').attr('disabled', true);
@@ -17,7 +18,8 @@ function configure(json) {
     $('#save-button').click(onSaveButtonClicked);
     $('#local_pass').keypress(onKeyPressed);
 
-    $('#local-scad-code').text(formatScadCode(json.local_mac));
+    //$('#local-scad-code').text(formatScadCode(json.local_mac));
+    $('[id="local-scad-code"]').text(formatScadCode(json.local_mac));
     if (json.remote_mac != "") {
         $('#remote-scad-code').text(formatScadCode(json.remote_mac));
         $('#remote-scad-code-input').hide();
@@ -119,9 +121,10 @@ function onSaveButtonClicked(event) {
             $('#alert-text').show();
             $('#alert-text').removeClass('alert-danger');
             $('#alert-text').addClass('alert-success');
-            $('#alert-text').text('Done');
+            $('#alert-text').text('Saved');
+            $('#nextstep').show();
 
-            setTimeout(function(){ reboot(); }, 2000);
+            reboot(10000);
         },
         error: function (jqXHR, textStatus, errorThrown) {
             console.log(jqXHR);
@@ -129,15 +132,18 @@ function onSaveButtonClicked(event) {
             console.log(errorThrown);
             $('#alert-text').show();
             $('#alert-text').addClass('alert-danger');
-            $('#alert-text').text('Error updating configuration!');
+            $('#alert-text').text('Couldn\'t Save');
         }
     });
 }
 
-function reboot() {
+function reboot(t) {
     $.ajax({
-        type: "GET",
+        type: "POST",
         url: "/reboot",
+        data: JSON.stringify({ delay: t }),
+        dataType: 'text',
+        contentType: 'application/json; charset=utf-8',
         cache: false,
         timeout: 15000,
         async: false,
