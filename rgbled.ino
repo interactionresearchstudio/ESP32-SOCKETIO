@@ -116,14 +116,16 @@ void longFadeHandler() {
         unsigned long currLongFadeVal = long((float)longFadeMinutes[i] / ((float)LONGFADEMINUTESMAX / (float)RGBLEDPWMSTART));
         if (currLongFadeVal != prevLongFadeVal[i]) {
           prevLongFadeVal[i] = currLongFadeVal;
-          currLongFadeVal = currLongFadeVal - 1;
+          if (currLongFadeVal > 0) {
+            currLongFadeVal = currLongFadeVal - 1;
+          }
           value[i] = (byte)fscale(0, RGBLEDPWMSTART, 0, RGBLEDPWMSTART, currLongFadeVal, -3);
           ledChanged[i] = true;
           Serial.print("LED:");
           Serial.println(i);
           Serial.println(value[i]);
         }
-        if (longFadeMinutes[i] <= 0) {
+        if (longFadeMinutes[i] <= 0 || value[i] == 0) {
           isLongFade[i] = false;
         }
       }
