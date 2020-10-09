@@ -159,7 +159,7 @@ int longButtonPressDelay = 5000;
 //reset timers
 bool isResetting = false;
 unsigned long resetTime;
-int resetLength = 4000;
+int resetDurationMs = 4000;
 
 String myID = "";
 
