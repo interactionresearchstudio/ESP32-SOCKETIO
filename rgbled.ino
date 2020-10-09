@@ -26,7 +26,6 @@ void rgbLedHandler() {
     if (ledChanged[USERLED]) {
       ledChanged[USERLED] = false;
       saturation[USERLED] = 255;
-      value[USERLED] = 255;
       leds[USERLED] = CHSV(hue[USERLED], saturation[USERLED], value[USERLED]);
       FastLED.show();
     }
@@ -37,7 +36,7 @@ void rgbLedHandler() {
       leds[REMOTELED] = CHSV(hue[REMOTELED], saturation[REMOTELED], value[REMOTELED]);
       FastLED.show();
     }
-    //long fade on remote led
+    //long fade
     longFadeHandler();
   }
   //updating every 5 seconds to make sure the leds dont lose their colours
@@ -50,6 +49,7 @@ void rgbLedHandler() {
 }
 
 void cycleHue(int led) {
+  value[led] = 255;
   if (hue[led] < 255) {
     hue[led]++;
   } else {
@@ -101,27 +101,31 @@ void fadeRGBHandler() {
   }
 }
 
-void startLongFade() {
-  isLongFade = true;
-  longFadeMinutes = LONGFADEMINUTESMAX;
-  prevLongFadeVal = 0;
+void startLongFade(byte LED) {
+  isLongFade[LED] = true;
+  longFadeMinutes[LED] = LONGFADEMINUTESMAX;
+  prevLongFadeVal[LED] = 0;
 }
 
 void longFadeHandler() {
-  if (isLongFade) {
-    if (millis() - prevLongFadeMillis > LONGFADECHECKMILLIS) {
-      prevLongFadeMillis = millis();
-      longFadeMinutes--;
-      unsigned long currLongFadeVal = long((float)longFadeMinutes / ((float)LONGFADEMINUTESMAX / (float)RGBLEDPWMSTART));
-      if (currLongFadeVal != prevLongFadeVal) {
-        prevLongFadeVal = currLongFadeVal;
-        currLongFadeVal = currLongFadeVal - 1;
-        value[REMOTELED] = (byte)fscale(0, RGBLEDPWMSTART, 0, RGBLEDPWMSTART, currLongFadeVal, -3);
-        ledChanged[REMOTELED] = true;
-        Serial.println(value[REMOTELED]);
-      }
-      if (longFadeMinutes <= 0) {
-        isLongFade = false;
+  for (byte i = 0; i < NUMPIXELS; i++) {
+    if (isLongFade[i]) {
+      if (millis() - prevLongFadeMillis[i] > LONGFADECHECKMILLIS) {
+        prevLongFadeMillis[i] = millis();
+        longFadeMinutes[i]--;
+        unsigned long currLongFadeVal = long((float)longFadeMinutes[i] / ((float)LONGFADEMINUTESMAX / (float)RGBLEDPWMSTART));
+        if (currLongFadeVal != prevLongFadeVal[i]) {
+          prevLongFadeVal[i] = currLongFadeVal;
+          currLongFadeVal = currLongFadeVal - 1;
+          value[i] = (byte)fscale(0, RGBLEDPWMSTART, 0, RGBLEDPWMSTART, currLongFadeVal, -3);
+          ledChanged[i] = true;
+          Serial.print("LED:");
+          Serial.println(i);
+          Serial.println(value[i]);
+        }
+        if (longFadeMinutes[i] <= 0) {
+          isLongFade[i] = false;
+        }
       }
     }
   }

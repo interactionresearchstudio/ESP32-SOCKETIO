@@ -74,17 +74,16 @@ using namespace ace_button;
 #define FASTLONGFADE 120
 unsigned long LONGFADEMINUTESMAX = 360;
 #define LONGFADECHECKMILLIS 60000
-unsigned long  prevLongFadeVal = 0;
+unsigned long  prevLongFadeVal[NUMPIXELS] = {0,0};
 uint8_t hue[NUMPIXELS];
 uint8_t saturation[NUMPIXELS];
 uint8_t value[NUMPIXELS];
-uint8_t prevRemoteSat;
 bool ledChanged[NUMPIXELS] = {false, false};
 unsigned long prevPixelMillis;
-bool isLongFade = false;
+bool isLongFade[NUMPIXELS]= {false,false};
 unsigned long prevlongPixelMillis;
-unsigned long longFadeMinutes;
-unsigned long prevLongFadeMillis;
+unsigned long longFadeMinutes[NUMPIXELS];
+unsigned long prevLongFadeMillis[NUMPIXELS];
 bool isRemoteLedFading = false;
 CRGB leds[NUMPIXELS];
 bool readyToFadeRGB[NUMPIXELS] = {false, false};

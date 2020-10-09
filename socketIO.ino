@@ -43,7 +43,7 @@ void socketIO_msg(const char * payload, size_t length) {
    //added to enable reset of fading mid fade
     isFadingRGB[REMOTELED] = false;
     fadeRGB(REMOTELED);
-    startLongFade();
+    startLongFade(REMOTELED);
   }
   else if (String(data_project) == "test") {
     blinkDevice();
