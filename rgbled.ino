@@ -26,14 +26,23 @@ void rgbLedHandler() {
     if (ledChanged[USERLED]) {
       ledChanged[USERLED] = false;
       saturation[USERLED] = 255;
-      leds[USERLED] = CHSV(hue[USERLED], saturation[USERLED], value[USERLED]);
+      if (value[USERLED] == 0) {
+        //Turn off
+        leds[USERLED] = CHSV(0, 0, 0);
+      } else {
+        leds[USERLED] = CHSV(hue[USERLED], saturation[USERLED], value[USERLED]);
+      }
       FastLED.show();
     }
     if (ledChanged[REMOTELED]) {
       ledChanged[REMOTELED] = false;
       saturation[REMOTELED] = 255;
-      //  value[REMOTELED] = 255;
-      leds[REMOTELED] = CHSV(hue[REMOTELED], saturation[REMOTELED], value[REMOTELED]);
+      if (value[REMOTELED] == 0) {
+        //turn off
+        leds[REMOTELED] = CHSV(0, 0, 0);
+      } else {
+        leds[REMOTELED] = CHSV(hue[REMOTELED], saturation[REMOTELED], value[REMOTELED]);
+      }
       FastLED.show();
     }
     //long fade
