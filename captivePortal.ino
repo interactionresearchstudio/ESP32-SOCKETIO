@@ -137,15 +137,12 @@ class CaptiveRequestHandler : public AsyncWebHandler {
       }
 
       if (remote_pass != "" && remote_ssid != "" && local_ssid != "" && local_pass != "") {
-        local_ssid = checkSsidForSpelling(local_ssid);
-        remote_ssid = checkSsidForSpelling(remote_ssid);
         addToWiFiJSON(local_ssid, local_pass);
         addToWiFiJSON(remote_ssid, remote_pass);
         sendWifiCredentials();
         result = true;
       }
       else if (local_pass != "" && local_ssid != "" && remote_ssid == "" && remote_pass == "") {
-        local_ssid = checkSsidForSpelling(local_ssid);
         addToWiFiJSON(local_ssid, local_pass);
         sendWifiCredentials();
         result = true;
