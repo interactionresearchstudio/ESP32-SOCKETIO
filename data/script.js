@@ -38,7 +38,7 @@ function configureDisplay(local_paired_status) {
         case 'remoteSetup':
             console.log("remote");
             //Show local wifi form, local and remote IDs
-            $('#remoteWifiForm').hide();
+            $('#remoteWifiForm').show();
             $('#remoteMacForm').show();
             break;
         case 'localSetup':
@@ -50,7 +50,7 @@ function configureDisplay(local_paired_status) {
         case 'pairedSetup':
             //just show local wifi details
             console.log("paired");
-            $('#remoteWifiForm').hide();
+            $('#remoteWifiForm').show();
             $('#remoteMacForm').hide();
             break;
     }
