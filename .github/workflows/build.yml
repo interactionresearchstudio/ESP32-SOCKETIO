@@ -78,10 +78,9 @@ jobs:
 
       - name: Merge binaries
         run: |
-          find / -name "bootloader_dio_80m.bin"
           python esp32_binary_merger/merge_bin_esp.py \
             --output_name app-combined.bin \
-            --bin_path /home/runner/.arduino15/packages/esp32/tools/sdk/bin/bootloader_dio_80m.bin build/ESP32-SOCKETIO.ino.partitions.bin build/ESP32-SOCKETIO.ino.bin build/spiffs.bin \
+            --bin_path /home/runner/.arduino15/packages/esp32/hardware/esp32/1.0.4/tools/sdk/bin/bootloader_dio_80m.bin build/ESP32-SOCKETIO.ino.partitions.bin build/ESP32-SOCKETIO.ino.bin build/spiffs.bin \
             --bin_address 0x1000 0x8000 0x10000 0x150000
           mv output/app-combined.bin build/app-combined.bin
           mv build/ESP32-SOCKETIO.ino.bin build/app.bin
