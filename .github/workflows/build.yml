@@ -68,7 +68,7 @@ jobs:
 
       - name: Create spiffs binary
         run: |
-          /home/runner/.arduino15/packages/esp32/tools/mkspiffs/0.2.3/mkspiffs -c ESP32-SOCKETIO/data -b 4096 -p 256 -s 0x170000 build/spiffs.bin
+          /home/runner/.arduino15/packages/esp32/tools/mkspiffs/0.2.3/mkspiffs -c ESP32-SOCKETIO/data -b 4096 -p 256 -s 0xB0000 build/spiffs.bin
 
       - name: Checkout esp_binary_merger
         uses: actions/checkout@v2
@@ -81,7 +81,7 @@ jobs:
           python esp32_binary_merger/merge_bin_esp.py \
             --output_name app-combined.bin \
             --bin_path ESP32-SOCKETIO/helpers/bootloader_qio_80m.bin build/ESP32-SOCKETIO.ino.partitions.bin build/ESP32-SOCKETIO.ino.bin build/spiffs.bin \
-            --bin_address 0x1000 0x8000 0x10000 0x290000
+            --bin_address 0x1000 0x8000 0x10000 0x150000
           mv output/app-combined.bin build/app-combined.bin
           mv build/ESP32-SOCKETIO.ino.bin build/app.bin
 
