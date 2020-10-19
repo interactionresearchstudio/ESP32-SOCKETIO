@@ -64,7 +64,7 @@ jobs:
         run: |
           mkdir build
           echo "Compiling ${{github.repository}}..."
-          arduino-cli compile -v -b esp32:esp32:esp32 --output-dir build ESP32-SOCKETIO
+          arduino-cli compile -v -b esp32:esp32:esp32 --build-properties build.partitions=minimal --output-dir build ESP32-SOCKETIO
 
       - name: Create spiffs binary
         run: |
