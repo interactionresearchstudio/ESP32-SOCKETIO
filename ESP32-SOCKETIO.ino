@@ -73,7 +73,7 @@ using namespace ace_button;
 #define RGBLEDPWMSTART 120
 #define FASTLONGFADE 120
 unsigned long LONGFADEMINUTESMAX = 360;
-#define LONGFADECHECKMILLIS 60000
+#define LONGFADECHECKMILLIS 120000
 unsigned long  prevLongFadeVal[NUMPIXELS] = {0,0};
 uint8_t hue[NUMPIXELS];
 uint8_t saturation[NUMPIXELS];

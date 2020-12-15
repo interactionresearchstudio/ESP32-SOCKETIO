@@ -72,7 +72,7 @@ void connectToWifi(String credentials) {
   if (ssid.size() > 0) {
     for (int i = 0; i < ssid.size(); i++) {
       if (isWifiValid(ssid[i])) {
-      wifiMulti.addAP(checkSsidForSpelling(ssid[i]).c_str(), pass[i]);
+        wifiMulti.addAP(checkSsidForSpelling(ssid[i]).c_str(), pass[i]);
       }
     }
   } else {
@@ -134,31 +134,12 @@ void connectToWifi(String credentials) {
 
     if (millis() - wifiMillis > WIFICONNECTTIMEOUT) {
       // Timeout, check if we're out of range.
-      while (hasConnected) {
-        // Out of range, keep trying
-        uint8_t _currentStatus = wifiMulti.run();
-        if (_currentStatus == WL_CONNECTED) {
-          digitalWrite(LED_BUILTIN, 0);
-          preferences.begin("scads", false);
-          preferences.putBool("hasConnected", true);
-          preferences.end();
-          break;
-        }
-        else {
-          digitalWrite(LED_BUILTIN, 1);
-          delay(100);
-          Serial.print(".");
-        }
-        yield();
-      }
-      if (!hasConnected) {
-        // Wipe credentials and reset
-        Serial.println("Wifi connect failed, Please try your details again in the captive portal");
-        preferences.begin("scads", false);
-        preferences.putString("wifi", "");
-        preferences.end();
-        ESP.restart();
-      }
+      // Wipe credentials and reset
+      Serial.println("Wifi connect failed, Please try your details again in the captive portal");
+      preferences.begin("scads", false);
+      preferences.putString("wifi", "");
+      preferences.end();
+      ESP.restart();
     }
 
     delay(100);
