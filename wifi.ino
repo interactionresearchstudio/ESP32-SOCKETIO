@@ -84,10 +84,6 @@ void connectToWifi(String credentials) {
   long wifiMillis = millis();
   bool connectSuccess = false;
 
-  preferences.begin("scads", false);
-  bool hasConnected = preferences.getBool("hasConnected");
-  preferences.end();
-
   while (!connectSuccess) {
 
     uint8_t currentStatus = wifiMulti.run();
@@ -121,13 +117,6 @@ void connectToWifi(String credentials) {
 
     if (currentStatus == WL_CONNECTED) {
       // Connected!
-
-      if (!hasConnected) {
-        preferences.begin("scads", false);
-        preferences.putBool("hasConnected", true);
-        preferences.end();
-        hasConnected = true;
-      }
       connectSuccess = true;
       break;
     }
