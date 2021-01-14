@@ -11,7 +11,7 @@ void setupPins() {
   buttonConfigBuiltIn->setEventHandler(handleButtonEvent);
   buttonConfigBuiltIn->setFeature(ButtonConfig::kFeatureClick);
   buttonConfigBuiltIn->setFeature(ButtonConfig::kFeatureLongPress);
-  buttonConfigBuiltIn->setLongPressDelay(LONG_TOUCH);
+  buttonConfigBuiltIn->setLongPressDelay(LONG_PRESS);
 
   touchConfig.setFeature(ButtonConfig::kFeatureClick);
   touchConfig.setFeature(ButtonConfig::kFeatureLongPress);
@@ -64,9 +64,7 @@ void handleButtonEvent(AceButton* button, uint8_t eventType, uint8_t buttonState
           if (currentSetupStatus == setup_finished) socketIO_sendButtonPress();
           break;
         case AceButton::kEventLongPressed:
-#ifdef DEV
           factoryReset();
-#endif
           break;
         case AceButton::kEventRepeatPressed:
           break;
@@ -200,4 +198,19 @@ long checkFadingLength() {
     Serial.println("Your fade time is 6 hours");
     return 360;
   }
+}
+
+void setLastConnected(String ssid) {
+  preferences.begin("scads", false);
+  preferences.putString("lastConnected",ssid);
+  preferences.end();
+
+}
+
+String getLastConnected() {
+  String lastConnected;
+  preferences.begin("scads", false);
+  lastConnected = preferences.getString("lastConnected", "");
+  preferences.end();
+  return lastConnected;
 }
