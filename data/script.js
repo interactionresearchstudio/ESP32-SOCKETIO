@@ -80,8 +80,13 @@ function populateNetworksList(selectedNetwork) {
             networks.append(network);
         });
 
-        $('#networks-list-select').attr('disabled', false);
-        $('#local_pass').attr('disabled', false);
+        if($('#networks-list-select option').length > 0) {
+            $('#networks-list-select').attr('disabled', false);
+            $('#local_pass').attr('disabled', false);
+        }
+        else {
+            networks.append('<option>No Networks Found</option>');
+        }
     });
 }
 
